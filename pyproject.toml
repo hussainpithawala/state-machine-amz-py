@@ -1,0 +1,66 @@
+[tool.poetry]
+name = "state-machine-amz-py"
+version = "0.1.0"
+description = "A powerful, extensible state machine implementation for Python applications"
+authors = ["Your Name <your.email@example.com>"]
+license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/hussainpithawala/state-machine-amz-py"
+repository = "https://github.com/hussainpithawala/state-machine-amz-py"
+documentation = "https://github.com/hussainpithawala/state-machine-amz-py#readme"
+keywords = ["state-machine", "finite-state-machine", "fsm", "workflow", "automation"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+]
+
+# Explicitly define packages
+packages = [
+    { include = "state_machine", from = "src" },
+]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+pydantic = "^2.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.0"
+pytest-cov = "^4.0"
+black = "^23.0"
+isort = "^5.12"
+flake8 = "^7.3.0"
+mypy = "^1.0"
+pre-commit = "^3.0"
+
+[tool.poetry.group.docs.dependencies]
+sphinx = "^7.0"
+sphinx-rtd-theme = "^1.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 88
+target-version = ['py38']
+
+[tool.isort]
+profile = "black"
+line_length = 88
+
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "--cov=state_machine --cov-report=term-missing"
