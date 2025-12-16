@@ -7,6 +7,7 @@ poetry run pytest
 # Run specific test files
 ```bash
 poetry run pytest tests/test_internal/test_base.py -v
+poetry run pytest tests/test_internal/test_succeed.py -v
 poetry run pytest tests/test_internal/test_json_path.py -v
 ```
 

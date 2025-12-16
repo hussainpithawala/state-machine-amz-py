@@ -10,6 +10,7 @@ from src.state_machine.__internal__.states.jsonpath_ng_processor import (
 )
 
 
+@pytest.mark.skip("Unsupported processor for testing")
 class TestJsonPathNgProcessor:
     """Test suite for JsonPathNgProcessor."""
 

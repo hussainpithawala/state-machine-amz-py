@@ -166,23 +166,25 @@ class BaseState(ABC):
         """Check if this is an end state."""
         return self.end
 
-    def validate(self) -> None:
+    def validate(self, skip_type=False, skip_next_state=False) -> None:
         """
         Validate the state configuration.
 
         Raises:
             ValueError: If the state configuration is invalid
+            :param skip_type:
+            :param skip_next_state:
         """
         if not self.name:
             raise ValueError("State name cannot be empty")
 
-        if not self.type:
+        if not self.type and not skip_type:
             raise ValueError("State type cannot be empty")
 
-        if self.next_state is None and not self.end:
+        if self.next_state is None and not self.end and not skip_next_state:
             raise ValueError("State must have either Next or End")
 
-        if self.next_state is not None and self.end:
+        if self.next_state is not None and self.end and not skip_next_state:
             raise ValueError("State cannot have both Next and End")
 
     def get_next_states(self) -> List[str]:
@@ -333,8 +335,6 @@ def get_path_processor() -> PathProcessor:
         from .json_path import JSONPathProcessor
 
         _default_path_processor = JSONPathProcessor()  # type: ignore[no-untyped-call]
-        # from .jsonpath_ng_processor import JsonPathNgProcessor
-        # _default_path_processor = JsonPathNgProcessor()
     return _default_path_processor
 
 

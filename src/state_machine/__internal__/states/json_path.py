@@ -22,7 +22,7 @@ class JSONPathProcessor(PathProcessor):
         """Initialize the JSON path processor."""
         pass
 
-    def to_json(self, value: Any) -> Tuple[Optional[str], Optional[str]]:
+    def to_json(self, value: Any) -> Optional[str]:
         """
         Convert value to JSON string.
 
@@ -33,9 +33,9 @@ class JSONPathProcessor(PathProcessor):
             Tuple of (json_string, error_message)
         """
         try:
-            return json.dumps(value), None
+            return json.dumps(value)
         except (TypeError, ValueError) as e:
-            return None, str(e)
+            raise ValueError(f"Failed to convert value to JSON: {str(e)}", e)
 
     def from_json(self, json_str: str) -> Tuple[Any, Optional[str]]:
         """
@@ -48,9 +48,9 @@ class JSONPathProcessor(PathProcessor):
             Tuple of (value, error_message)
         """
         try:
-            return json.loads(json_str), None
+            return json.loads(json_str)
         except json.JSONDecodeError as e:
-            return None, str(e)
+            raise ValueError(f"Failed to parse JSON: {str(e)}", e)
 
     def split_path(self, path: str) -> List[str]:
         """
@@ -142,12 +142,8 @@ class JSONPathProcessor(PathProcessor):
             return output
 
         try:
-            value, err = self.get_value(output, path)
-            if err is None:
-                return value
-            # If path doesn't exist, wrap the output
-            return self.wrap_value(path, output)
-        except Exception:
+            return self.get_value(output, path)
+        except ValueError as ve:
             # If any error occurs, wrap the output
             return self.wrap_value(path, output)
 
@@ -163,10 +159,10 @@ class JSONPathProcessor(PathProcessor):
             Tuple of (value, error_message)
         """
         if path == "$":
-            return data, None
+            return data
 
         if not path.startswith("$"):
-            return None, "path must start with '$'"
+            raise ValueError("path must start with '$'")
 
         # Remove $ and optional leading .
         path = path[1:]  # Remove "$"
@@ -187,15 +183,15 @@ class JSONPathProcessor(PathProcessor):
                     index = int(index_str)
 
                     if not isinstance(current, list):
-                        return None, "cannot index non-array"
+                        raise ValueError("cannot index non-array")
 
                     if index < 0 or index >= len(current):
-                        return None, f"array index {index} out of bounds"
+                        raise ValueError(f"array index {index} out of bounds")
 
                     current = current[index]
                     continue
-                except ValueError:
-                    return None, f"invalid array index: {part}"
+                except ValueError as ve:
+                    raise ValueError(f"invalid array index: {part}", ve)
 
             # Handle object field
             # Check if current is a dict and has the key directly
@@ -212,11 +208,11 @@ class JSONPathProcessor(PathProcessor):
                     continue
 
             # Field not found
-            return None, f"field '{part}' not found"
+            raise ValueError(f"field '{part}' not found")
 
-        return current, None
+        return current
 
-    def set_value(self, data: Any, path: str, value: Any) -> Tuple[Any, Optional[str]]:
+    def set_value(self, data: Any, path: str, value: Any) -> Any:
         """
         Set a value at a JSONPath.
 
@@ -229,10 +225,10 @@ class JSONPathProcessor(PathProcessor):
             Tuple of (new_data, error_message)
         """
         if path == "$":
-            return value, None
+            return value
 
         if not path.startswith("$"):
-            return None, "path must start with '$'"
+            raise ValueError("path must start with '$'")
 
         # Parse the path
         path = path[1:]  # Remove "$"
@@ -258,19 +254,19 @@ class JSONPathProcessor(PathProcessor):
                     arr = [None] * (index + 1)
                     arr[index] = result
                     result = arr
-                except ValueError:
-                    return None, f"invalid array index: {part}"
+                except ValueError as ve:
+                    raise ValueError(f"invalid array index: {part}", ve)
             else:
                 # Object field
                 result = {part: result}
 
         # Merge with original data if it's a map
         if isinstance(data, dict) and isinstance(result, dict):
-            return self._merge_maps(data, result), None
+            return self._merge_maps(data, result)
 
-        return result, None
+        return result
 
-    def wrap_value(self, path: str, value: Any) -> Tuple[Any, Optional[str]]:
+    def wrap_value(self, path: str, value: Any) -> Any:
         """
         Wrap a value in a nested structure based on path.
 
@@ -282,10 +278,10 @@ class JSONPathProcessor(PathProcessor):
             Tuple of (wrapped_value, error_message)
         """
         if path == "$":
-            return value, None
+            return value
 
         if not path.startswith("$"):
-            return None, "path must start with '$'"
+            return ValueError("path must start with '$'")
 
         # Parse the path
         path = path[1:]  # Remove "$"
@@ -311,17 +307,17 @@ class JSONPathProcessor(PathProcessor):
                     arr = [None] * (index + 1)
                     arr[index] = result
                     result = arr
-                except ValueError:
-                    return None, f"invalid array index: {part}"
+                except ValueError as ve:
+                    return ValueError(f"invalid array index: {part}", ve)
             else:
                 # Object field
                 result = {part: result}
 
-        return result, None
+        return result
 
     def expand_parameters(
         self, params: Dict[str, Any], input_data: Any
-    ) -> Tuple[Dict[str, Any], Optional[Any]]:
+    ) -> Dict[str, Any]:
         """
         Expand parameters with JSONPath references.
 
@@ -334,15 +330,11 @@ class JSONPathProcessor(PathProcessor):
         """
         result = {}
         for key, value in params.items():
-            expanded, err = self.expand_value(value, input_data)
-            if err is not None:
-                return {}, f"failed to expand parameter '{key}': {err}"
+            expanded = self.expand_value(value, input_data)
             result[key] = expanded
-        return result, None
+        return result
 
-    def expand_value(
-        self, value: Any, input_data: Any
-    ) -> Tuple[Optional[Any], Optional[str]]:
+    def expand_value(self, value: Any, input_data: Any) -> Optional[Any]:
         """
         Expand a single value with JSONPath references.
 
@@ -356,28 +348,23 @@ class JSONPathProcessor(PathProcessor):
         if isinstance(value, str):
             if value.startswith("$"):
                 return self.get_value(input_data, value)
-            return value, None
+            return value
 
         elif isinstance(value, dict):
             result = {}
             for key, val in value.items():
-                expanded, err = self.expand_value(val, input_data)
-                if err is not None:
-                    return None, err
+                expanded = self.expand_value(val, input_data)
                 result[key] = expanded
-            return result, None
+            return result
 
         elif isinstance(value, list):
             result = []
             for val in value:
-                expanded, err = self.expand_value(val, input_data)
-                if err is not None:
-                    return None, err
+                expanded = self.expand_value(val, input_data)
                 result.append(expanded)
-            return result, None
-
+            return result
         else:
-            return value, None
+            return value
 
     def _merge_maps(self, a: Dict[str, Any], b: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -450,10 +437,7 @@ class JSONPathProcessor(PathProcessor):
         if path is None or path == "" or path == "$":
             return input_data
 
-        value, err = self.get_value(input_data, path)
-        if err is not None:
-            raise ValueError(f"Failed to apply input path '{path}': {err}")
-        return value
+        return self.get_value(input_data, path)
 
     def apply_result_path_safe(
         self, input_data: Any, result: Any, path: Optional[str]
@@ -478,9 +462,7 @@ class JSONPathProcessor(PathProcessor):
         if path == "$":
             return result
 
-        new_data, err = self.set_value(input_data, path, result)
-        if err is not None:
-            raise ValueError(f"Failed to apply result path '{path}': {err}")
+        new_data = self.set_value(input_data, path, result)
         return new_data
 
     def apply_output_path_safe(self, output: Any, path: Optional[str]) -> Any:
@@ -499,14 +481,7 @@ class JSONPathProcessor(PathProcessor):
         """
         if path is None or path == "" or path == "$":
             return output
-
         try:
-            value, err = self.get_value(output, path)
-            if err is None:
-                return value
-            wrapped, err = self.wrap_value(path, output)
-            if err is not None:
-                raise ValueError(f"Failed to apply output path '{path}': {err}")
-            return wrapped
-        except Exception as e:
-            raise ValueError(f"Failed to apply output path '{path}': {e}")
+            return self.get_value(output, path)
+        except ValueError as e:
+            return self.wrap_value(path, output)

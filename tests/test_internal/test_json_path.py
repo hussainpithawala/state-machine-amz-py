@@ -49,124 +49,101 @@ class TestJSONPathProcessor:
 
     def test_get_value_root(self, processor, sample_data):
         """Test getting root value."""
-        value, error = processor.get_value(sample_data, "$")
-        assert error is None
+        value = processor.get_value(sample_data, "$")
         assert value == sample_data
 
     def test_get_value_simple_path(self, processor, sample_data):
         """Test getting value with simple path."""
-        value, error = processor.get_value(sample_data, "$.metadata.id")
-        assert error is None
+        value = processor.get_value(sample_data, "$.metadata.id")
         assert value == 123
 
     def test_get_value_nested_path(self, processor, sample_data):
         """Test getting value with nested path."""
-        value, error = processor.get_value(sample_data, "$.input.user.address.city")
-        assert error is None
+        value = processor.get_value(sample_data, "$.input.user.address.city")
         assert value == "New York"
 
     def test_get_value_array_index(self, processor, sample_data):
         """Test getting value with array index."""
-        value, error = processor.get_value(sample_data, "$.input.items[1]")
-        assert error is None
+        value = processor.get_value(sample_data, "$.input.items[1]")
         assert value == "banana"
 
     def test_get_value_nested_array(self, processor, sample_array_data):
         """Test getting value from nested array."""
-        value, error = processor.get_value(sample_array_data, "$.users[2].name")
-        assert error is None
+        value = processor.get_value(sample_array_data, "$.users[2].name")
         assert value == "Charlie"
 
     def test_get_value_multi_dimensional_array(self, processor, sample_array_data):
         """Test getting value from multi-dimensional array."""
-        value, error = processor.get_value(sample_array_data, "$.matrix[1][2]")
-        assert error is None
+        value = processor.get_value(sample_array_data, "$.matrix[1][2]")
         assert value == 6
 
     def test_get_value_path_not_starting_with_dollar(self, processor, sample_data):
         """Test getting value with invalid path."""
-        value, error = processor.get_value(sample_data, "metadata.id")
-        assert error == "path must start with '$'"
-        assert value is None
+        with pytest.raises(ValueError, match="path must start with '\$'"):
+            processor.get_value(sample_data, "metadata.id")
 
     def test_get_value_field_not_found(self, processor, sample_data):
         """Test getting value with non-existent field."""
-        value, error = processor.get_value(sample_data, "$.metadata.nonexistent")
-        assert error == "field 'nonexistent' not found"
-        assert value is None
+        with pytest.raises(ValueError, match="field 'nonexistent' not found"):
+            processor.get_value(sample_data, "$.metadata.nonexistent")
 
     def test_get_value_array_index_out_of_bounds(self, processor, sample_data):
         """Test getting value with out-of-bounds array index."""
-        value, error = processor.get_value(sample_data, "$.input.items[10]")
-        assert error == "array index 10 out of bounds"
-        assert value is None
+        with pytest.raises(ValueError, match="array index 10 out of bounds"):
+            processor.get_value(sample_data, "$.input.items[10]")
 
     def test_get_value_invalid_array_index(self, processor, sample_data):
         """Test getting value with invalid array index."""
-        value, error = processor.get_value(sample_data, "$.input.items[not-a-number]")
-        assert "invalid array index" in error
-        assert value is None
+        with pytest.raises(ValueError, match="invalid array index: \[not-a-number\]"):
+            processor.get_value(sample_data, "$.input.items[not-a-number]")
 
     def test_get_value_index_non_array(self, processor, sample_data):
         """Test indexing non-array."""
-        value, error = processor.get_value(sample_data, "$.metadata[0]")
-        assert error == "cannot index non-array"
-        assert value is None
+        with pytest.raises(ValueError, match=""):
+            processor.get_value(sample_data, "$.metadata[0]")
 
     # Test set_value method
 
     def test_set_value_root(self, processor):
         """Test setting root value."""
-        result, error = processor.set_value({"old": "data"}, "$", {"new": "data"})
-        assert error is None
+        result = processor.set_value({"old": "data"}, "$", {"new": "data"})
         assert result == {"new": "data"}
 
     def test_set_value_simple_path(self, processor):
         """Test setting value with simple path."""
         data = {"existing": "value"}
-        result, error = processor.set_value(data, "$.new_field", "new_value")
-
-        assert error is None
+        result = processor.set_value(data, "$.new_field", "new_value")
         assert result == {"existing": "value", "new_field": "new_value"}
 
     def test_set_value_nested_path(self, processor):
         """Test setting value with nested path."""
         data = {"top": {"middle": {"bottom": "old"}}}
-        result, error = processor.set_value(data, "$.top.middle.bottom", "new")
-
-        assert error is None
+        result = processor.set_value(data, "$.top.middle.bottom", "new")
         assert result == {"top": {"middle": {"bottom": "new"}}}
 
     def test_set_value_array_index(self, processor):
         """Test setting value with array index."""
         data = {"items": ["a", "b", "c"]}
-        result, error = processor.set_value(data, "$.items[1]", "X")
-
-        assert error is None
+        result = processor.set_value(data, "$.items[1]", "X")
         assert result == {"items": ["a", "X", "c"]}
 
     def test_set_value_create_nested_structure(self, processor):
         """Test creating nested structure."""
         data = {}
-        result, error = processor.set_value(data, "$.a.b.c", "value")
-
-        assert error is None
+        result = processor.set_value(data, "$.a.b.c", "value")
         assert result == {"a": {"b": {"c": "value"}}}
 
     def test_set_value_create_array(self, processor):
         """Test creating array structure."""
         data = {}
-        result, error = processor.set_value(data, "$.items[2]", "third")
-
-        assert error is None
+        result = processor.set_value(data, "$.items[2]", "third")
         assert result == {"items": [None, None, "third"]}
 
     def test_set_value_merge_with_existing(self, processor):
         """Test merging with existing data."""
         data = {"existing": "value", "nested": {"keep": "this"}}
-        result, error = processor.set_value(data, "$.nested.new", "added")
+        result = processor.set_value(data, "$.nested.new", "added")
 
-        assert error is None
         assert result == {
             "existing": "value",
             "nested": {"keep": "this", "new": "added"},
@@ -174,53 +151,45 @@ class TestJSONPathProcessor:
 
     def test_set_value_path_not_starting_with_dollar(self, processor):
         """Test setting value with invalid path."""
-        result, error = processor.set_value({}, "invalid.path", "value")
-        assert error == "path must start with '$'"
-        assert result is None
+        with pytest.raises(ValueError, match="path must start with '\$'"):
+            processor.set_value({}, "metadata.id", "new-id")
 
     def test_set_value_invalid_array_index(self, processor):
         """Test setting value with invalid array index."""
-        result, error = processor.set_value({}, "$.items[not-a-number]", "value")
-        assert "invalid array index" in error
-        assert result is None
+        with pytest.raises(ValueError, match="invalid array index: \[not-a-number\]"):
+            processor.set_value({}, "$.items[not-a-number]", "value")
 
     # Test wrap_value method
 
     def test_wrap_value_root(self, processor):
         """Test wrapping root value."""
-        result, error = processor.wrap_value("$", "value")
-        assert error is None
+        result = processor.wrap_value("$", "value")
         assert result == "value"
 
     def test_wrap_value_simple_path(self, processor):
         """Test wrapping value with simple path."""
-        result, error = processor.wrap_value("$.field", "value")
-        assert error is None
+        result = processor.wrap_value("$.field", "value")
         assert result == {"field": "value"}
 
     def test_wrap_value_nested_path(self, processor):
         """Test wrapping value with nested path."""
-        result, error = processor.wrap_value("$.a.b.c", "value")
-        assert error is None
+        result = processor.wrap_value("$.a.b.c", "value")
         assert result == {"a": {"b": {"c": "value"}}}
 
     def test_wrap_value_with_array(self, processor):
         """Test wrapping value with array path."""
-        result, error = processor.wrap_value("$.items[0]", "first")
-        assert error is None
+        result = processor.wrap_value("$.items[0]", "first")
         assert result == {"items": ["first"]}
 
     def test_wrap_value_complex_path(self, processor):
         """Test wrapping value with complex path."""
-        result, error = processor.wrap_value("$.users[1].name", "Bob")
-        assert error is None
+        result = processor.wrap_value("$.users[1].name", "Bob")
         assert result == {"users": [None, {"name": "Bob"}]}
 
     def test_wrap_value_path_not_starting_with_dollar(self, processor):
         """Test wrapping value with invalid path."""
-        result, error = processor.wrap_value("invalid.path", "value")
-        assert error == "path must start with '$'"
-        assert result is None
+        with pytest.raises(ValueError, match="invalid array index: \[not-a-number\]"):
+            processor.set_value({}, "$.items[not-a-number]", "value")
 
     # Test apply_input_path method
 
@@ -240,14 +209,14 @@ class TestJSONPathProcessor:
 
     def test_apply_input_path_valid_path(self, processor, sample_data):
         """Test apply_input_path with valid path."""
-        result, err_str = processor.apply_input_path(sample_data, "$.metadata")
+        result = processor.apply_input_path(sample_data, "$.metadata")
         assert result == sample_data["metadata"]
 
     def test_apply_input_path_path_not_found(self, processor, sample_data):
         """Test apply_input_path with non-existent path."""
         # Should return wrapped value
-        result, err_str = processor.apply_input_path(sample_data, "$.nonexistent")
-        assert result is None
+        with pytest.raises(ValueError, match="nonexistent"):
+            processor.apply_input_path(sample_data, "$.nonexistent")
 
     # Test apply_result_path method
 
@@ -268,7 +237,7 @@ class TestJSONPathProcessor:
 
     def test_apply_result_path_valid_path(self, processor):
         """Test apply_result_path with valid path."""
-        result, err_str = processor.apply_result_path(
+        result = processor.apply_result_path(
             {"original": "data"}, "new_result", "$.result"
         )
         # Creates nested structure
@@ -281,7 +250,7 @@ class TestJSONPathProcessor:
         input_data = {"user": "John", "settings": {"theme": "dark"}}
         result = "success"
 
-        output, err_str = processor.apply_result_path(input_data, result, "$.status")
+        output = processor.apply_result_path(input_data, result, "$.status")
 
         assert output["user"] == "John"
         assert output["settings"]["theme"] == "dark"
@@ -311,7 +280,7 @@ class TestJSONPathProcessor:
     def test_apply_output_path_path_not_found(self, processor, sample_data):
         """Test apply_output_path with non-existent path."""
         # Should wrap the output
-        result, err_str = processor.apply_output_path(sample_data, "$.nonexistent")
+        result = processor.apply_output_path(sample_data, "$.nonexistent")
         assert result == {"nonexistent": sample_data}
 
     # Test expand_parameters method
@@ -319,10 +288,7 @@ class TestJSONPathProcessor:
     def test_expand_parameters_no_paths(self, processor, sample_data):
         """Test expand_parameters without JSONPath references."""
         params = {"name": "test", "value": 42, "enabled": True}
-
-        result, error = processor.expand_parameters(params, sample_data)
-
-        assert error is None
+        result = processor.expand_parameters(params, sample_data)
         assert result == params
 
     def test_expand_parameters_with_paths(self, processor, sample_data):
@@ -333,9 +299,8 @@ class TestJSONPathProcessor:
             "static": "value",
         }
 
-        result, error = processor.expand_parameters(params, sample_data)
+        result = processor.expand_parameters(params, sample_data)
 
-        assert error is None
         assert result["user_name"] == "John"
         assert result["city"] == "New York"
         assert result["static"] == "value"
@@ -344,85 +309,68 @@ class TestJSONPathProcessor:
         """Test expand_parameters with nested structure."""
         params = {"user": {"info": "$.input.user", "first_item": "$.input.items[0]"}}
 
-        result, error = processor.expand_parameters(params, sample_data)
+        result = processor.expand_parameters(params, sample_data)
 
-        assert error is None
         assert result["user"]["info"]["name"] == "John"
         assert result["user"]["first_item"] == "apple"
 
     def test_expand_parameters_array(self, processor, sample_data):
         """Test expand_parameters with array containing paths."""
         params = {"items": ["$.input.items[0]", "$.input.items[1]", "static"]}
-
-        result, error = processor.expand_parameters(params, sample_data)
-
-        assert error is None
+        result = processor.expand_parameters(params, sample_data)
         assert result["items"] == ["apple", "banana", "static"]
 
     def test_expand_parameters_path_not_found(self, processor, sample_data):
         """Test expand_parameters with non-existent path."""
         params = {"invalid": "$.nonexistent.path"}
 
-        result, error = processor.expand_parameters(params, sample_data)
-
-        assert error is not None
-        assert "failed to expand parameter" in error
+        with pytest.raises(ValueError, match="field 'nonexistent' not found"):
+            processor.expand_parameters(params, sample_data)
 
     # Test expand_value method
 
     def test_expand_value_string_path(self, processor, sample_data):
         """Test expand_value with string path."""
-        value, error = processor.expand_value("$.input.user.name", sample_data)
-
-        assert error is None
+        value = processor.expand_value("$.input.user.name", sample_data)
         assert value == "John"
 
     def test_expand_value_string_literal(self, processor, sample_data):
         """Test expand_value with string literal."""
-        value, error = processor.expand_value("literal string", sample_data)
-
-        assert error is None
+        value = processor.expand_value("literal string", sample_data)
         assert value == "literal string"
 
     def test_expand_value_dict(self, processor, sample_data):
         """Test expand_value with dictionary."""
-        value, error = processor.expand_value(
+        value = processor.expand_value(
             {"name": "$.input.user.name", "age": 30}, sample_data
         )
 
-        assert error is None
         assert value["name"] == "John"
         assert value["age"] == 30
 
     def test_expand_value_array(self, processor, sample_data):
         """Test expand_value with array."""
-        value, error = processor.expand_value(
+        value = processor.expand_value(
             ["$.input.items[0]", "$.input.items[1]", "end"], sample_data
         )
-
-        assert error is None
         assert value == ["apple", "banana", "end"]
 
     def test_expand_value_other_types(self, processor, sample_data):
         """Test expand_value with other types."""
         # Integer
-        value, error = processor.expand_value(42, sample_data)
-        assert error is None
+        value = processor.expand_value(42, sample_data)
         assert value == 42
 
         # Float
-        value, error = processor.expand_value(3.14, sample_data)
-        assert error is None
+        value = processor.expand_value(3.14, sample_data)
         assert value == 3.14
 
         # Boolean
-        value, error = processor.expand_value(True, sample_data)
-        assert error is None
+        value = processor.expand_value(True, sample_data)
         assert value is True
 
         # None
-        value, error = processor.expand_value(None, sample_data)
-        assert error is None
+        value = processor.expand_value(None, sample_data)
         assert value is None
 
     # Test to_json and from_json methods
@@ -430,9 +378,7 @@ class TestJSONPathProcessor:
     def test_to_json_valid(self, processor):
         """Test to_json with valid data."""
         data = {"name": "John", "age": 30, "active": True}
-        json_str, error = processor.to_json(data)
-
-        assert error is None
+        json_str = processor.to_json(data)
         parsed = json.loads(json_str)
         assert parsed == data
 
@@ -443,27 +389,21 @@ class TestJSONPathProcessor:
             pass
 
         data = {"obj": NonSerializable()}
-        json_str, error = processor.to_json(data)
-
-        assert error is not None
-        assert json_str is None
+        with pytest.raises(ValueError):
+            processor.to_json(data)
 
     def test_from_json_valid(self, processor):
         """Test from_json with valid JSON."""
         json_str = '{"name": "John", "age": 30}'
-        data, error = processor.from_json(json_str)
-
-        assert error is None
+        data = processor.from_json(json_str)
         assert data["name"] == "John"
         assert data["age"] == 30
 
     def test_from_json_invalid(self, processor):
         """Test from_json with invalid JSON."""
         json_str = '{"name": "John", "age": 30'  # Missing closing brace
-        data, error = processor.from_json(json_str)
-
-        assert error is not None
-        assert data is None
+        with pytest.raises(ValueError):
+            processor.from_json(json_str)
 
     # Test _split_path method
 
@@ -528,16 +468,13 @@ class TestJSONPathProcessor:
 
     def test_get_public_method(self, processor, sample_data):
         """Test public Get method."""
-        value, error = processor.get(sample_data, "$.metadata.id")
-        assert error is None
+        value = processor.get(sample_data, "$.metadata.id")
         assert value == 123
 
     def test_set_public_method(self, processor):
         """Test public Set method."""
         data = {"existing": "value"}
-        result, error = processor.set(data, "$.new", "value")
-
-        assert error is None
+        result= processor.set(data, "$.new", "value")
         assert result["existing"] == "value"
         assert result["new"] == "value"
 
@@ -559,7 +496,7 @@ class TestJSONPathProcessor:
 
     def test_apply_input_path_safe_invalid(self, processor, sample_data):
         """Test apply_input_path_safe with invalid path."""
-        with pytest.raises(ValueError, match="Failed to apply input path"):
+        with pytest.raises(ValueError, match="path must start with '\$'"):
             processor.apply_input_path_safe(sample_data, "invalid.path")
 
     def test_apply_result_path_safe(self, processor):
@@ -581,13 +518,11 @@ class TestJSONPathProcessor:
         data = {"a": {"b": [{"c": 1}, {"c": 2, "d": {"e": "deep"}}]}}
 
         # Get deep value
-        value, error = processor.get_value(data, "$.a.b[1].d.e")
-        assert error is None
+        value = processor.get_value(data, "$.a.b[1].d.e")
         assert value == "deep"
 
         # Set deep value
-        result, error = processor.set_value(data, "$.a.b[0].new", "added")
-        assert error is None
+        result = processor.set_value(data, "$.a.b[0].new", "added")
         assert result["a"]["b"][0]["new"] == "added"
 
     def test_path_with_special_characters(self, processor):
@@ -602,7 +537,7 @@ class TestJSONPathProcessor:
         # This test documents current behavior
 
         # For now, test with simple field names
-        value, error = processor.get_value(data, "$.field-with-dash")
+        value = processor.get_value(data, "$.field-with-dash")
         # This might fail depending on implementation
         # assert error is None or "not found" in error
 
@@ -611,25 +546,21 @@ class TestJSONPathProcessor:
         data = {"empty_obj": {}, "empty_arr": [], "nested": {"empty": {}}}
 
         # Get from empty object
-        value, error = processor.get_value(data, "$.empty_obj.nonexistent")
-        assert error is not None
-        assert "not found" in error
+        with pytest.raises(ValueError, match="not found"):
+            processor.get_value(data, "$.empty_obj.nonexistent")
 
         # Get from empty array
-        value, error = processor.get_value(data, "$.empty_arr[0]")
-        assert error is not None
-        assert "out of bounds" in error
+        with pytest.raises(ValueError, match="out of bounds"):
+            processor.get_value(data, "$.empty_arr[0]")
 
     def test_null_values(self, processor):
         """Test with null values."""
         data = {"null_field": None, "nested": {"null": None}}
 
         # Get null value
-        value, error = processor.get_value(data, "$.null_field")
-        assert error is None
+        value = processor.get_value(data, "$.null_field")
         assert value is None
 
         # Set null value
-        result, error = processor.set_value(data, "$.new_null", None)
-        assert error is None
+        result = processor.set_value(data, "$.new_null", None)
         assert result["new_null"] is None
