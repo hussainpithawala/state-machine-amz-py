@@ -209,7 +209,7 @@ class TestPassState:
         mock_path_processor.apply_input_path.return_value = sample_input_data
         mock_path_processor.apply_output_path.return_value = sample_input_data
 
-        output, next_state, error = await state.execute(sample_input_data)
+        output, next_state = await state.execute(sample_input_data)
 
         # Verify processor calls
         mock_path_processor.apply_input_path.assert_called_once_with(sample_input_data, None)
@@ -218,7 +218,7 @@ class TestPassState:
         # Verify results
         assert output == sample_input_data
         assert next_state == "NextState"
-        assert error is None
+
 
     @pytest.mark.asyncio
     async def test_pass_state_execute_with_result(self, mock_path_processor, sample_input_data):
@@ -231,7 +231,7 @@ class TestPassState:
         )
         state.set_path_processor(mock_path_processor)
 
-        output, next_state, error = await state.execute(sample_input_data)
+        output, next_state = await state.execute(sample_input_data)
 
         # Verify processor calls
         mock_path_processor.apply_input_path.assert_called_once_with(sample_input_data, None)
@@ -243,7 +243,7 @@ class TestPassState:
         # Verify results
         assert output == "final_output"
         assert next_state == "NextState"
-        assert error is None
+
 
     @pytest.mark.asyncio
     async def test_pass_state_execute_with_parameters(self, mock_path_processor, sample_input_data):
@@ -256,7 +256,7 @@ class TestPassState:
         )
         state.set_path_processor(mock_path_processor)
 
-        output, next_state, error = await state.execute(sample_input_data)
+        output, next_state = await state.execute(sample_input_data)
 
         # Verify processor calls
         mock_path_processor.apply_input_path.assert_called_once()
@@ -267,7 +267,7 @@ class TestPassState:
 
         assert output == "final_output"
         assert next_state == "NextState"
-        assert error is None
+
 
     @pytest.mark.asyncio
     async def test_pass_state_execute_with_input_path(self, mock_path_processor, sample_input_data):
@@ -345,11 +345,11 @@ class TestPassState:
 
         context = {"execution_id": "test-123", "timestamp": "2024-01-15"}
 
-        output, next_state, error = await state.execute(sample_input_data, context)
+        output, next_state =  await state.execute(sample_input_data, context)
 
         assert output == "final_output"
         assert next_state == "NextState"
-        assert error is None
+
 
     @pytest.mark.asyncio
     async def test_pass_state_execute_end_state(self, mock_path_processor, sample_input_data):
@@ -357,11 +357,11 @@ class TestPassState:
         state = PassState(name="EndPass", end=True)
         state.set_path_processor(mock_path_processor)
 
-        output, next_state, error = await state.execute(sample_input_data)
+        output, next_state = await state.execute(sample_input_data)
 
         assert output == "final_output"
         assert next_state is None  # End state has no next
-        assert error is None
+
 
     @pytest.mark.asyncio
     async def test_pass_state_execute_path_processing_error(self, sample_input_data):
@@ -381,12 +381,12 @@ class TestPassState:
         state = PassState(name="NilPass", next_state="NextState")
         state.set_path_processor(mock_path_processor)
 
-        output, next_state, error = await state.execute(None)
+        output, next_state =  await state.execute(None)
 
         mock_path_processor.apply_input_path.assert_called_once_with(None, None)
         assert output == "final_output"
         assert next_state == "NextState"
-        assert error is None
+
 
     @pytest.mark.asyncio
     async def test_pass_state_execute_uses_default_processor(self, sample_input_data):
@@ -402,7 +402,7 @@ class TestPassState:
 
             state = PassState(name="DefaultPass", next_state="NextState")
 
-            output, next_state, error = await state.execute(sample_input_data)
+            output, next_state = await state.execute(sample_input_data)
 
             mock_default.apply_input_path.assert_called_once()
             assert output == sample_input_data
@@ -568,11 +568,11 @@ class TestPassState:
         state.set_path_processor(mock_path_processor)
 
         empty_input = {}
-        output, next_state, error = await state.execute(empty_input)
+        output, next_state =  await state.execute(empty_input)
 
         assert output == "final_output"
         assert next_state == "NextState"
-        assert error is None
+
 
     @pytest.mark.asyncio
     async def test_pass_state_execute_different_input_types(self, mock_path_processor):
@@ -593,11 +593,10 @@ class TestPassState:
         for input_data, description in test_cases:
             mock_path_processor.reset_mock()
 
-            output, next_state, error = await state.execute(input_data)
+            output, next_state =  await state.execute(input_data)
 
             assert output == "final_output", f"Failed for {description}"
             assert next_state == "NextState", f"Failed for {description}"
-            assert error is None, f"Failed for {description}"
 
     # Test integration with real processor
 
@@ -617,11 +616,11 @@ class TestPassState:
             "metadata": {"source": "test"}
         }
 
-        output, next_state, error = await state.execute(input_data)
+        output, next_state =  await state.execute(input_data)
 
         assert output == input_data
         assert next_state == "NextState"
-        assert error is None
+
 
     @pytest.mark.asyncio
     async def test_pass_state_integration_with_result(self):
@@ -640,13 +639,13 @@ class TestPassState:
 
         input_data = {"original": "data"}
 
-        output, next_state, error = await state.execute(input_data)
+        output, next_state =  await state.execute(input_data)
 
         # Result should be injected at result_path
         assert "result" in output
         assert output["result"] == result_data
         assert next_state == "NextState"
-        assert error is None
+
 
     # Test inheritance
 
@@ -692,8 +691,7 @@ class TestPassState:
         results = await asyncio.gather(*tasks)
 
         assert len(results) == num_tasks
-        for i, (output, next_state, error) in enumerate(results):
+        for i, (output, next_state) in enumerate(results):
             assert output["id"] == i
             assert output["data"] == f"task_{i}"
             assert next_state == "NextState"
-            assert error is None

@@ -56,7 +56,7 @@ class FailState(BaseState):
 
     async def execute(
         self, input_data: Any, context: Optional[Dict[str, Any]] = None
-    ) -> Tuple[Any, Optional[str], Optional[Exception]]:
+    ) -> Tuple[Any, Optional[str]]:
         """
         Execute the Fail state.
 
@@ -74,14 +74,11 @@ class FailState(BaseState):
             context = {}
 
         # Create error with the specified error code and cause
-        error = StateError(
+        raise StateError(
             message=self.cause or f"State '{self.name}' failed",
             state_name=self.name,
             error_type=self.error,
         )
-
-        # Fail states return no output, no next state, and an error
-        return None, None, error
 
     def validate(self, skip_type=False, skip_next_state=False) -> None:
         """

@@ -235,7 +235,7 @@ class BaseState(ABC):
     @abstractmethod
     async def execute(
         self, input_data: Any, context: Optional[Dict[str, Any]] = None
-    ) -> tuple[Any, Optional[str], Optional[Exception]]:
+    ) -> tuple[Any, Optional[str]]:
         """
         Execute the state with the given input.
 

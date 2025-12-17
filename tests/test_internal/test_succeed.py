@@ -170,7 +170,7 @@ class TestSucceedState:
         state = SucceedState(name="SimpleSucceed")
         state.set_path_processor(mock_path_processor)
 
-        output, next_state, err = await state.execute(sample_input_data)
+        output, next_state = await state.execute(sample_input_data)
 
         # Verify processor calls
         mock_path_processor.apply_input_path.assert_called_once_with(sample_input_data, None)
@@ -179,7 +179,6 @@ class TestSucceedState:
         # Verify results
         assert output == "final_output"
         assert next_state is None  # Succeed states have no next state
-        assert err is None  # No error
 
     @pytest.mark.asyncio
     async def test_succeed_state_execute_with_input_path(self, mock_path_processor, sample_input_data):
@@ -226,12 +225,12 @@ class TestSucceedState:
 
         context = {"execution_id": "test-123", "timestamp": "2024-01-15"}
 
-        output, next_state, error = await state.execute(sample_input_data, context)
+        output, next_state =  await state.execute(sample_input_data, context)
 
         # Context should be ignored by SucceedState
         assert output == "final_output"
         assert next_state is None
-        assert error is None
+
 
     @pytest.mark.asyncio
     async def test_succeed_state_execute_path_processing_error(self, sample_input_data):
@@ -252,12 +251,12 @@ class TestSucceedState:
         state = SucceedState(name="SucceedWithNil")
         state.set_path_processor(mock_path_processor)
 
-        output, next_state, error = await state.execute(None)
+        output, next_state =  await state.execute(None)
 
         mock_path_processor.apply_input_path.assert_called_once_with(None, None)
         assert output == "final_output"
         assert next_state is None
-        assert error is None
+
 
     @pytest.mark.asyncio
     async def test_succeed_state_execute_uses_default_processor(self, sample_input_data):
@@ -277,7 +276,7 @@ class TestSucceedState:
             # Create state without setting processor
             state = SucceedState(name="DefaultProcessorSucceed")
 
-            output, next_state, error = await state.execute(sample_input_data)
+            output, next_state = await state.execute(sample_input_data)
 
             # Should use default processor
             mock_default.apply_input_path.assert_called_once_with(sample_input_data, None)
@@ -434,12 +433,12 @@ class TestSucceedState:
         state.set_path_processor(mock_path_processor)
 
         empty_input = {}
-        output, next_state, error = await state.execute(empty_input)
+        output, next_state =  await state.execute(empty_input)
 
         mock_path_processor.apply_input_path.assert_called_once_with(empty_input, None)
         assert output == "final_output"
         assert next_state is None
-        assert error is None
+
 
     @pytest.mark.asyncio
     async def test_succeed_state_execute_different_input_types(self, mock_path_processor):
@@ -461,12 +460,11 @@ class TestSucceedState:
         for input_data, description in test_cases:
             mock_path_processor.reset_mock()
 
-            output, next_state, error = await state.execute(input_data)
+            output, next_state =  await state.execute(input_data)
 
             mock_path_processor.apply_input_path.assert_called_once_with(input_data, None)
             assert output == "final_output", f"Failed for {description}"
             assert next_state is None, f"Failed for {description}"
-            assert error is None, f"Failed for {description}"
 
     @pytest.mark.asyncio
     async def test_succeed_state_execute_complex_transformation(self, mock_path_processor):
@@ -507,7 +505,7 @@ class TestSucceedState:
             "metadata": {"processed": True, "version": "1.0"}
         }
 
-        output, next_state, error = await state.execute(input_data)
+        output, next_state =  await state.execute(input_data)
 
         # Verify calls
         mock_processor.apply_input_path.assert_called_once_with(input_data, "$.transaction")
@@ -518,7 +516,7 @@ class TestSucceedState:
         # Verify output structure
         assert output == {"summary": input_data["transaction"]}
         assert next_state is None
-        assert error is None
+
 
     # Test integration with actual JsonPathNgProcessor
 
@@ -538,12 +536,12 @@ class TestSucceedState:
             "metadata": {"source": "test"}
         }
 
-        output, next_state, error = await state.execute(input_data)
+        output, next_state =  await state.execute(input_data)
 
         # With no paths, output should be same as input
         assert output == input_data
         assert next_state is None
-        assert error is None
+
 
     @pytest.mark.asyncio
     async def test_succeed_state_integration_with_paths(self):
@@ -562,12 +560,12 @@ class TestSucceedState:
             "other": "data"
         }
 
-        output, next_state, error = await state.execute(input_data)
+        output, next_state =  await state.execute(input_data)
 
         # Should extract name and wrap in "username" field
         assert output == {"username": "Alice"}
         assert next_state is None
-        assert error is None
+
 
     # Test that SucceedState inherits from BaseState correctly
 
@@ -620,11 +618,11 @@ class TestSucceedState:
 
         # Verify all completed successfully
         assert len(results) == num_tasks
-        for i, (output, next_state, error) in enumerate(results):
+        for i, (output, next_state) in enumerate(results):
             assert output["id"] == i
             assert output["data"] == f"task_{i}"
             assert next_state is None
-            assert error is None
+
 
         # Verify processor was called correct number of times
         assert mock_processor.apply_input_path.call_count == num_tasks
@@ -671,8 +669,7 @@ async def test_succeed_state_benchmark(benchmark):
 
     # Use pytest-benchmark if available
     result = benchmark(run_execute)
-    output, next_state, error = await run_execute()
+    output, next_state =  await run_execute()
 
     assert output == input_data
     assert next_state is None
-    assert error is None

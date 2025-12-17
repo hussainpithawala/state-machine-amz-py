@@ -69,7 +69,7 @@ class PassState(BaseState):
 
     async def execute(
         self, input_data: Any, context: Optional[Dict[str, Any]] = None
-    ) -> Tuple[Any, Optional[str], Optional[Exception]]:
+    ) -> Tuple[Any, Optional[str]]:
         """
         Execute the Pass state.
 
@@ -114,7 +114,7 @@ class PassState(BaseState):
             final_output = processor.apply_output_path(combined_data, self.output_path)
 
             # Return output and next state
-            return final_output, self.next_state, None
+            return final_output, self.next_state
 
         except Exception as e:
             # Wrap any processing error in StateError

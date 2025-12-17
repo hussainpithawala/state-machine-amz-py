@@ -54,7 +54,7 @@ class SucceedState(BaseState):
 
     async def execute(
         self, input_data: Any, context: Optional[Dict[str, Any]] = None
-    ) -> Tuple[Any, Optional[str], Optional[Exception]]:
+    ) -> Tuple[Any, Optional[str]]:
         """
         Execute the Succeed state.
 
@@ -84,7 +84,7 @@ class SucceedState(BaseState):
             )
 
             # Succeed states always end execution (no next state, no error)
-            return final_output, None, None
+            return final_output, None
 
         except Exception as e:
             # Wrap any processing error in StateError

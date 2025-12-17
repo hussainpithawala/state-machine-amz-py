@@ -75,13 +75,13 @@ class ConcreteState(BaseState):
 
     async def execute(
         self, input_data: Any, context: Optional[Dict[str, Any]] = None
-    ) -> tuple[Any, Optional[str], Optional[Exception]]:
+    ) -> tuple[Any, Optional[str]]:
         """Test execution that returns input + 1."""
         if context and context.get("fail"):
             raise StateExecutionError("Test failure")
 
         result = input_data + 1 if isinstance(input_data, (int, float)) else input_data
-        return result, self.next_state, None
+        return result, self.next_state
 
 
 # Test Classes
@@ -448,11 +448,11 @@ class TestBaseState:
             next_state="NextState",
         )
 
-        output, next_state, error = await state.execute(42)
+        output, next_state =  await state.execute(42)
 
         assert output == 43  # input + 1
         assert next_state == "NextState"
-        assert error is None
+
 
     @pytest.mark.asyncio
     async def test_base_state_execute_with_context(self):
@@ -464,11 +464,11 @@ class TestBaseState:
         )
 
         # Test with context but no failure
-        output, next_state, error = await state.execute(42, {"test": "value"})
+        output, next_state =  await state.execute(42, {"test": "value"})
 
         assert output == 43
         assert next_state == "NextState"
-        assert error is None
+
 
     @pytest.mark.asyncio
     async def test_base_state_execute_failure(self):

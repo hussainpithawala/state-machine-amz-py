@@ -79,7 +79,7 @@ class WaitState(BaseState):
 
     async def execute(
         self, input_data: Any, context: Optional[Dict[str, Any]] = None
-    ) -> Tuple[Any, Optional[str], Optional[Exception]]:
+    ) -> Tuple[Any, Optional[str]]:
         """
         Execute the Wait state.
 
@@ -127,7 +127,7 @@ class WaitState(BaseState):
             final_output = processor.apply_output_path(output, self.output_path)
 
             # Return output and next state
-            return final_output, self.next_state, None
+            return final_output, self.next_state
 
         except StateError:
             # Re-raise StateError as-is

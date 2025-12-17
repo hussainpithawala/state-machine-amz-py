@@ -176,12 +176,12 @@ class TestWaitState:
         state.set_path_processor(mock_path_processor)
 
         start_time = time.time()
-        output, next_state, error = await state.execute(sample_input_data)
+        output, next_state = await state.execute(sample_input_data)
         elapsed = time.time() - start_time
 
         assert output == sample_input_data
         assert next_state == "NextState"
-        assert error is None
+
         # Verify we waited approximately 1 second (with tolerance)
         assert elapsed >= 1.0
         assert elapsed < 2.0
@@ -193,12 +193,12 @@ class TestWaitState:
         state.set_path_processor(mock_path_processor)
 
         start_time = time.time()
-        output, next_state, error = await state.execute(sample_input_data)
+        output, next_state = await state.execute(sample_input_data)
         elapsed = time.time() - start_time
 
         assert output == sample_input_data
         assert next_state == "NextState"
-        assert error is None
+
         # Should complete immediately
         assert elapsed < 0.1
 
@@ -210,12 +210,12 @@ class TestWaitState:
         state.set_path_processor(mock_path_processor)
 
         start_time = time.time()
-        output, next_state, error = await state.execute(sample_input_data)
+        output, next_state = await state.execute(sample_input_data)
         elapsed = time.time() - start_time
 
         assert output == sample_input_data
         assert next_state == "NextState"
-        assert error is None
+
         assert elapsed >= 0.5
         assert elapsed < 1.0
 
@@ -233,12 +233,12 @@ class TestWaitState:
         input_data = {"duration": 1, "key": "value"}
 
         start_time = time.time()
-        output, next_state, error = await state.execute(input_data)
+        output, next_state =  await state.execute(input_data)
         elapsed = time.time() - start_time
 
         assert output == input_data
         assert next_state == "NextState"
-        assert error is None
+
         assert elapsed >= 1.0
         mock_path_processor.get.assert_called_once()
 
@@ -253,10 +253,10 @@ class TestWaitState:
         input_data = {"duration": 0.5}
 
         start_time = time.time()
-        output, next_state, error = await state.execute(input_data)
+        output, next_state =  await state.execute(input_data)
         elapsed = time.time() - start_time
 
-        assert error is None
+
         assert elapsed >= 0.5
         assert elapsed < 1.0
 
@@ -292,19 +292,19 @@ class TestWaitState:
     async def test_wait_state_execute_with_timestamp(self, mock_path_processor, sample_input_data):
         """Test WaitState execution with Timestamp."""
         # Set timestamp to 1 second in the future
-        future_time = datetime.now(timezone.utc) + timedelta(seconds=1)
+        future_time = datetime.now(timezone.utc) + timedelta(seconds=2)
         timestamp = future_time.strftime("%Y-%m-%dT%H:%M:%SZ")
 
         state = WaitState(name="WaitTimestamp", end=True, timestamp=timestamp)
         state.set_path_processor(mock_path_processor)
 
         start_time = time.time()
-        output, next_state, error = await state.execute(sample_input_data)
+        output, next_state = await state.execute(sample_input_data)
         elapsed = time.time() - start_time
 
         assert output == sample_input_data
         assert next_state is None  # End state
-        assert error is None
+
         # Should wait approximately 1 second
         assert elapsed >= 0.9  # Allow slight tolerance
 
@@ -319,12 +319,12 @@ class TestWaitState:
         state.set_path_processor(mock_path_processor)
 
         start_time = time.time()
-        output, next_state, error = await state.execute(sample_input_data)
+        output, next_state = await state.execute(sample_input_data)
         elapsed = time.time() - start_time
 
         assert output == sample_input_data
         assert next_state is None
-        assert error is None
+
         # Should complete immediately without waiting
         assert elapsed < 0.1
 
@@ -351,10 +351,10 @@ class TestWaitState:
         state.set_path_processor(mock_path_processor)
 
         start_time = time.time()
-        output, next_state, error = await state.execute(sample_input_data)
+        output, next_state = await state.execute(sample_input_data)
         elapsed = time.time() - start_time
 
-        assert error is None
+
         assert elapsed >= 0.4  # Allow tolerance
 
     # Test execute method with TimestampPath
@@ -377,12 +377,12 @@ class TestWaitState:
         input_data = {"waitUntil": timestamp, "data": "test"}
 
         start_time = time.time()
-        output, next_state, error = await state.execute(input_data)
+        output, next_state =  await state.execute(input_data)
         elapsed = time.time() - start_time
 
         assert output == input_data
         assert next_state == "NextState"
-        assert error is None
+
         assert elapsed >= 0.9  # Allow tolerance
 
     @pytest.mark.asyncio
@@ -439,10 +439,10 @@ class TestWaitState:
 
         input_data = {"data": {"filtered": "data"}, "other": "ignored"}
 
-        output, next_state, error = await state.execute(input_data)
+        output, next_state =  await state.execute(input_data)
 
         mock_path_processor.apply_input_path.assert_called_once_with(input_data, "$.data")
-        assert error is None
+
 
     @pytest.mark.asyncio
     async def test_wait_state_execute_with_result_path(self, mock_path_processor, sample_input_data):
@@ -455,10 +455,10 @@ class TestWaitState:
         )
         state.set_path_processor(mock_path_processor)
 
-        output, next_state, error = await state.execute(sample_input_data)
+        output, next_state = await state.execute(sample_input_data)
 
         mock_path_processor.apply_result_path.assert_called_once()
-        assert error is None
+
 
     @pytest.mark.asyncio
     async def test_wait_state_execute_with_output_path(self, mock_path_processor, sample_input_data):
@@ -471,10 +471,10 @@ class TestWaitState:
         )
         state.set_path_processor(mock_path_processor)
 
-        output, next_state, error = await state.execute(sample_input_data)
+        output, next_state = await state.execute(sample_input_data)
 
         mock_path_processor.apply_output_path.assert_called_once()
-        assert error is None
+
 
     # Test to_dict method
 
@@ -631,9 +631,9 @@ class TestWaitState:
 
         context = {"execution_id": "test-123"}
 
-        output, next_state, error = await state.execute(sample_input_data, context)
+        output, next_state =  await state.execute(sample_input_data, context)
 
-        assert error is None
+
         assert output == sample_input_data
 
     @pytest.mark.asyncio
@@ -642,9 +642,9 @@ class TestWaitState:
         state = WaitState(name="NilWait", next_state="Next", seconds=0)
         state.set_path_processor(mock_path_processor)
 
-        output, next_state, error = await state.execute(None)
+        output, next_state =  await state.execute(None)
 
-        assert error is None
+
         assert output is None
 
     @pytest.mark.asyncio
@@ -660,11 +660,11 @@ class TestWaitState:
 
         input_data = {"key": "value"}
 
-        output, next_state, error = await state.execute(input_data)
+        output, next_state =  await state.execute(input_data)
 
         assert output == input_data
         assert next_state == "Next"
-        assert error is None
+
 
     # Test inheritance
 
@@ -709,10 +709,10 @@ class TestWaitState:
         results = await asyncio.gather(*tasks)
 
         assert len(results) == num_tasks
-        for i, (output, next_state, error) in enumerate(results):
+        for i, (output, next_state) in enumerate(results):
             assert output["id"] == i
             assert next_state == "Next"
-            assert error is None
+
 
     # Test timestamp parsing formats
 
@@ -739,8 +739,8 @@ class TestWaitState:
             state = WaitState(name="FormatTest", next_state="Next", timestamp=timestamp)
             state.set_path_processor(mock_path_processor)
 
-            output, next_state, error = await state.execute(sample_input_data)
-            assert error is None
+            output, next_state = await state.execute(sample_input_data)
+
 
     # Test helper methods
 
