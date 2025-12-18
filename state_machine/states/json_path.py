@@ -143,7 +143,7 @@ class JSONPathProcessor(PathProcessor):
 
         try:
             return self.get_value(output, path)
-        except ValueError as ve:
+        except ValueError:
             # If any error occurs, wrap the output
             return self.wrap_value(path, output)
 
@@ -185,7 +185,7 @@ class JSONPathProcessor(PathProcessor):
                     if not isinstance(current, list):
                         # Check at the root level if it's an array at '$
                         sub_current = current.get("$", None)
-                        if not sub_current is None and isinstance(sub_current, list):
+                        if sub_current is not None and isinstance(sub_current, list):
                             current = sub_current
                         else:
                             raise ValueError("cannot index non-array")
@@ -488,5 +488,5 @@ class JSONPathProcessor(PathProcessor):
             return output
         try:
             return self.get_value(output, path)
-        except ValueError as e:
+        except ValueError:
             return self.wrap_value(path, output)

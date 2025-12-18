@@ -10,8 +10,8 @@ from typing import Any, Callable, Dict, Optional
 
 import pytest
 
-from src.state_machine.__internal__.states.base import CatchRule, RetryRule, StateError
-from src.state_machine.__internal__.states.task_state import (
+from state_machine.states.base import CatchRule, RetryRule, StateError
+from state_machine.states.task_state import (
     AbstractTaskHandler,
     DefaultTaskHandler,
     TaskState,

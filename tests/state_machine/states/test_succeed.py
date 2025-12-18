@@ -3,17 +3,12 @@ Tests for the SucceedState implementation.
 """
 
 import json
-from typing import Any, Dict
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 
 import pytest
 
-from src.state_machine.__internal__.states.base import (
-    StateError,
-    get_path_processor,
-    set_path_processor,
-)
-from src.state_machine.__internal__.states.succeed import SucceedState
+from state_machine.states.base import StateError, get_path_processor, set_path_processor
+from state_machine.states.succeed import SucceedState
 
 
 class TestSucceedState:
@@ -523,11 +518,9 @@ class TestSucceedState:
     @pytest.mark.asyncio
     async def test_succeed_state_integration_real_processor(self):
         """Test SucceedState integration with real JsonPathNgProcessor."""
-        from src.state_machine.__internal__.states.jsonpath_ng_processor import (
-            JsonPathNgProcessor,
-        )
+        from state_machine.states.json_path import JSONPathProcessor
 
-        processor = JsonPathNgProcessor()
+        processor = JSONPathProcessor()
         state = SucceedState(name="IntegrationTest")
         state.set_path_processor(processor)
 
@@ -546,7 +539,7 @@ class TestSucceedState:
     @pytest.mark.asyncio
     async def test_succeed_state_integration_with_paths(self):
         """Test SucceedState integration with real processor and paths."""
-        from src.state_machine.__internal__.states.json_path import JSONPathProcessor
+        from state_machine.states.json_path import JSONPathProcessor
         processor = JSONPathProcessor()
         state = SucceedState(
             name="PathIntegration",
@@ -647,11 +640,9 @@ def test_string_ptr_helper():
 @pytest.mark.asyncio
 async def test_succeed_state_benchmark(benchmark):
     """Benchmark SucceedState execution."""
-    from src.state_machine.__internal__.states.jsonpath_ng_processor import (
-        JsonPathNgProcessor,
-    )
+    from state_machine.states.json_path import JSONPathProcessor
 
-    processor = JsonPathNgProcessor()
+    processor = JSONPathProcessor()
     state = SucceedState(name="BenchmarkSucceed")
     state.set_path_processor(processor)
 

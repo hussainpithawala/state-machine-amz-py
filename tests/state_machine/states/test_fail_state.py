@@ -3,13 +3,11 @@ Tests for the FailState implementation.
 """
 
 import json
-from typing import Any, Dict
-from unittest.mock import Mock
 
 import pytest
 
-from src.state_machine.__internal__.states.base import StateError
-from src.state_machine.__internal__.states.fail_state import FailState
+from state_machine.states.base import StateError
+from state_machine.states.fail_state import FailState
 
 
 class TestFailState:

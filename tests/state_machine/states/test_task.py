@@ -5,18 +5,12 @@ Based on task_test.go
 """
 
 import asyncio
-from collections.abc import Callable
 from typing import Any, Dict, Optional
 
 import pytest
 
-from src.state_machine.__internal__.states.base import CatchRule, RetryRule
-from src.state_machine.__internal__.states.task_state import (
-    ExecutionContext,
-    TaskState,
-    with_execution_context,
-)
-from tests.test_internal.test_task_executor import MockExecutionContext
+from state_machine.states.base import CatchRule, RetryRule
+from state_machine.states.task_state import TaskState
 
 
 # Mock TaskHandler for testing

@@ -6,7 +6,7 @@ from typing import Any, Dict, Optional
 
 import pytest
 
-from src.state_machine.__internal__.states.base import (
+from state_machine.states.base import (
     BaseState,
     CatchRule,
     PathProcessor,

@@ -10,7 +10,7 @@ import asyncio
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
-from src.state_machine.__internal__.states.base import BaseState, StateError
+from state_machine.states.base import BaseState, StateError
 
 
 @dataclass

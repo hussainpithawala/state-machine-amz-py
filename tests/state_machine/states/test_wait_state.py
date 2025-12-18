@@ -6,17 +6,12 @@ import asyncio
 import json
 import time
 from datetime import datetime, timedelta, timezone
-from typing import Any, Dict
 from unittest.mock import Mock
 
 import pytest
 
-from src.state_machine.__internal__.states.base import (
-    StateError,
-    get_path_processor,
-    set_path_processor,
-)
-from src.state_machine.__internal__.states.wait_state import WaitState
+from state_machine.states.base import StateError
+from state_machine.states.wait_state import WaitState
 
 
 class TestWaitState:
@@ -650,11 +645,9 @@ class TestWaitState:
     @pytest.mark.asyncio
     async def test_wait_state_integration_real_processor(self):
         """Test WaitState integration with real processor."""
-        from src.state_machine.__internal__.states.jsonpath_ng_processor import (
-            JsonPathNgProcessor,
-        )
+        from state_machine.states.json_path import JSONPathProcessor
 
-        processor = JsonPathNgProcessor()
+        processor = JSONPathProcessor()
         state = WaitState(name="IntegrationWait", next_state="Next", seconds=0)
         state.set_path_processor(processor)
 

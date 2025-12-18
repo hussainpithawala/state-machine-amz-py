@@ -8,15 +8,11 @@ import asyncio
 
 import pytest
 
-from src.state_machine.__internal__.states.base import StateError
-from src.state_machine.__internal__.states.choice_state import ChoiceState
-from src.state_machine.__internal__.states.fail_state import FailState
-from src.state_machine.__internal__.states.parallel_state import (
-    Branch,
-    ParallelState,
-    create_branch,
-)
-from src.state_machine.__internal__.states.pass_state import PassState
+from state_machine.states.base import StateError
+from state_machine.states.choice_state import ChoiceState
+from state_machine.states.fail_state import FailState
+from state_machine.states.parallel_state import Branch, ParallelState, create_branch
+from state_machine.states.pass_state import PassState
 
 
 @pytest.mark.asyncio

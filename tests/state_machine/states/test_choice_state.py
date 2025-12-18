@@ -3,12 +3,11 @@ Tests for the Choice state implementation.
 """
 
 import json
-from datetime import datetime
 
 import pytest
 
-from src.state_machine.__internal__.states.base import StateError
-from src.state_machine.__internal__.states.choice_state import ChoiceRule, ChoiceState
+from state_machine.states.base import StateError
+from state_machine.states.choice_state import ChoiceRule, ChoiceState
 
 
 class TestChoiceRule:

@@ -27,8 +27,8 @@ repos:
         args: ["--max-line-length=88", "--extend-ignore=E203,W503,E713"]
         exclude: |
           (?x)^(
-            src/state_machine/__internal__/states/json_path.py |
-            src/state_machine/__internal__/states/jsonpath_ng_processor.py |
+            src/state_machine/states/json_path.py |
+            src/state_machine/states/jsonpath_ng_processor.py |
             tests/.* |
             other/test/path/.*
           )$
@@ -44,6 +44,5 @@ repos:
 #          (?x)^(
 #            tests/.* |
 #            other/test/path/.* |
-#            src/state_machine/__internal__/states/json_path.py |
-#            src/state_machine/__internal__/states/jsonpath_ng_processor.py |
+#            src/state_machine/states/json_path.py |
 #          )$

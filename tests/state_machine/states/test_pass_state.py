@@ -3,17 +3,12 @@ Tests for the PassState implementation.
 """
 
 import json
-from typing import Any, Dict
 from unittest.mock import Mock
 
 import pytest
 
-from src.state_machine.__internal__.states.base import (
-    StateError,
-    get_path_processor,
-    set_path_processor,
-)
-from src.state_machine.__internal__.states.pass_state import PassState
+from state_machine.states.base import StateError, get_path_processor, set_path_processor
+from state_machine.states.pass_state import PassState
 
 
 class TestPassState:
@@ -603,11 +598,9 @@ class TestPassState:
     @pytest.mark.asyncio
     async def test_pass_state_integration_real_processor(self):
         """Test PassState integration with real processor."""
-        from src.state_machine.__internal__.states.jsonpath_ng_processor import (
-            JsonPathNgProcessor,
-        )
+        from state_machine.states.json_path import JSONPathProcessor
 
-        processor = JsonPathNgProcessor()
+        processor = JSONPathProcessor()
         state = PassState(name="IntegrationPass", next_state="NextState")
         state.set_path_processor(processor)
 
@@ -625,7 +618,7 @@ class TestPassState:
     @pytest.mark.asyncio
     async def test_pass_state_integration_with_result(self):
         """Test PassState integration with result injection."""
-        from src.state_machine.__internal__.states.json_path import JSONPathProcessor
+        from state_machine.states.json_path import JSONPathProcessor
 
         processor = JSONPathProcessor()
         result_data = {"injected": "value", "count": 42}

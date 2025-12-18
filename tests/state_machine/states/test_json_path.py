@@ -6,7 +6,7 @@ import json
 
 import pytest
 
-from src.state_machine.__internal__.states.json_path import JSONPathProcessor
+from state_machine.states.json_path import JSONPathProcessor
 
 
 class TestJSONPathProcessor:
