@@ -9,7 +9,7 @@ from __future__ import annotations
 import asyncio
 from abc import ABC
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, List, Optional, Protocol, runtime_checkable
+from typing import Any, Dict, List, Optional, Protocol, runtime_checkable
 
 from .base import BaseState, CatchRule, RetryRule, StateError
 
@@ -50,7 +50,10 @@ class TaskHandler(Protocol):
 class ExecutionContext(Protocol):
     """Protocol for execution context that provides task handlers."""
 
-    def get_task_handler(self, resource: str) -> Optional[Callable[[Any], Any]]:
+    # def get_task_handler(self, resource: str) -> Optional[Callable[[Any], Any]]:
+    #     """Get a task handler for the given resource."""
+    #     ...
+    def get_task_handler(self, resource: str) -> TaskHandler:
         """Get a task handler for the given resource."""
         ...
 
@@ -294,10 +297,13 @@ class TaskState(BaseState):
                         self.timeout_seconds,
                         context,
                     )
-                else:
+                elif hasattr(handler, "execute"):
                     result = await handler.execute(
                         self.resource, task_input, self.parameters
                     )
+                else:
+                    raise ValueError("Invalid task handler")
+
                 return result, None
 
             except Exception as task_error:
