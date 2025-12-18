@@ -183,7 +183,12 @@ class JSONPathProcessor(PathProcessor):
                     index = int(index_str)
 
                     if not isinstance(current, list):
-                        raise ValueError("cannot index non-array")
+                        # Check at the root level if it's an array at '$
+                        sub_current = current.get("$", None)
+                        if not sub_current is None and isinstance(sub_current, list):
+                            current = sub_current
+                        else:
+                            raise ValueError("cannot index non-array")
 
                     if index < 0 or index >= len(current):
                         raise ValueError(f"array index {index} out of bounds")

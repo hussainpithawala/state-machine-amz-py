@@ -166,7 +166,7 @@ class BaseState(ABC):
         """Check if this is an end state."""
         return self.end
 
-    def validate(self, skip_type=False, skip_next_state=False) -> None:
+    def validate(self, skip_name=False, skip_type=False, skip_next_state=False) -> None:
         """
         Validate the state configuration.
 
@@ -175,16 +175,16 @@ class BaseState(ABC):
             :param skip_type:
             :param skip_next_state:
         """
-        if not self.name:
+        if not skip_name and not self.name:
             raise ValueError("State name cannot be empty")
 
-        if not self.type and not skip_type:
+        if not skip_type and not self.type:
             raise ValueError("State type cannot be empty")
 
-        if self.next_state is None and not self.end and not skip_next_state:
+        if not skip_next_state and self.next_state is None and not self.end:
             raise ValueError("State must have either Next or End")
 
-        if self.next_state is not None and self.end and not skip_next_state:
+        if not skip_next_state and self.next_state is not None and self.end:
             raise ValueError("State cannot have both Next and End")
 
     def get_next_states(self) -> List[str]:

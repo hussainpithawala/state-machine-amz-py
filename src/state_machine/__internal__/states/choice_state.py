@@ -135,7 +135,9 @@ class ChoiceState(BaseState):
         self.comment = comment
         super().__post_init__()
 
-    def validate(self, skip_type: bool = False, skip_next_state: bool = False) -> None:
+    def validate(
+        self, skip_name=False, skip_type: bool = False, skip_next_state: bool = False
+    ) -> None:
         """Validate the Choice state configuration."""
         # Validate basic fields
         if not self.name:

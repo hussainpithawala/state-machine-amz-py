@@ -89,8 +89,10 @@ class TestJSONPathProcessor:
 
     def test_get_value_array_index_out_of_bounds(self, processor, sample_data):
         """Test getting value with out-of-bounds array index."""
-        with pytest.raises(ValueError, match="array index 10 out of bounds"):
+        with pytest.raises(ValueError) as exec:
             processor.get_value(sample_data, "$.input.items[10]")
+        assert "array index 10 out of bounds" in str(exec.value)
+
 
     def test_get_value_invalid_array_index(self, processor, sample_data):
         """Test getting value with invalid array index."""

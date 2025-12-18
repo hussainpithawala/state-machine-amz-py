@@ -188,7 +188,7 @@ class TaskState(BaseState):
         ):
             raise ValueError(
                 f"Task state '{self.name}' HeartbeatSeconds"
-                f"must be less than TimeoutSeconds"
+                f" must be less than TimeoutSeconds"
             )
 
         # Validate retry policies
