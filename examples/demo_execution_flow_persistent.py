@@ -455,7 +455,7 @@ async def demo_7_complex_workflow(persistence_manager):
     elapsed = datetime.now() - start
 
     print(f"\nStatus: {execution.status}")
-    print(f"Total time: {elapsed.microseconds: .2f} microsecondss")
+    print(f"Total time: {elapsed.microseconds/1000: .2f} milli-seconds")
     print(f"States executed: {len(execution.history)}")
     print(f"Final output: {execution.output}")
 
@@ -575,9 +575,7 @@ async def demo_5_task_with_retry(persistence_manager: PersistenceManager):
     print(f"Status: {execution.status}")
     print(f"Output: {execution.output}")
     print(f"Total attempts: {call_count['count']}")
-    print(
-        f"Time taken: {elapsed.microseconds: .2f} micro-seconds (including retry delays)"
-    )
+    print(f"Time taken: {elapsed.seconds: .2f} seconds (including retry delays)")
 
     history = await psm.get_execution_history(execution_id=execution.id)
     pprint(history)
@@ -689,7 +687,9 @@ async def demo_6_parallel_execution(persistence_manager: PersistenceManager):
         elapsed = datetime.now() - start
 
         print(f"\nStatus: {execution.status}")
-        print(f"Parallel execution time: {elapsed.microseconds: .2f} micro-seconds")
+        print(
+            f"Parallel execution time: {elapsed.microseconds/1000: .2f} milli-seconds"
+        )
         print(f"Results: {execution.output}")
         history = await psm.get_execution_history(execution_id=execution.id)
         pprint(history)
