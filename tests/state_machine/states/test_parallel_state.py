@@ -8,11 +8,11 @@ import asyncio
 
 import pytest
 
-from pkg.states.base import StateError
-from pkg.states.choice_state import ChoiceState
-from pkg.states.fail_state import FailState
-from pkg.states.parallel_state import Branch, ParallelState, create_branch
-from pkg.states.pass_state import PassState
+from src.states.base import StateError
+from src.states.choice_state import ChoiceState
+from src.states.fail_state import FailState
+from src.states.parallel_state import Branch, ParallelState, create_branch
+from src.states.pass_state import PassState
 
 
 @pytest.mark.asyncio

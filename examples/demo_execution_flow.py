@@ -12,9 +12,10 @@ import time
 from datetime import datetime
 from typing import Any, Dict, Optional
 
-from examples import ExampleTaskHandler
-from pkg.machine import StateMachine
-from pkg.states import with_execution_context
+from src.machine import StateMachine
+from src.states import with_execution_context
+
+from . import ExampleTaskHandler
 
 
 # Mock execution context

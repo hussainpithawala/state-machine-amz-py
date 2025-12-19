@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from pkg.execution import Execution, StateHistory, _generate_execution_id
+from src.execution import Execution, StateHistory, _generate_execution_id
 
 
 class TestExecution:

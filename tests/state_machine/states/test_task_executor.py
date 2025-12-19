@@ -10,8 +10,8 @@ from typing import Any, Callable, Dict, Optional
 
 import pytest
 
-from pkg.states.base import CatchRule, RetryRule, StateError
-from pkg.states.task_state import (
+from src.states.base import CatchRule, RetryRule, StateError
+from src.states.task_state import (
     AbstractTaskHandler,
     DefaultTaskHandler,
     TaskState,

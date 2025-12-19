@@ -8,8 +8,8 @@ from datetime import datetime
 
 import pytest
 
-from pkg.execution import Execution
-from pkg.executor import BaseExecutor, ExecutionContextAdapter, StateRegistry
+from src.execution import Execution
+from src.executor import BaseExecutor, ExecutionContextAdapter, StateRegistry
 
 
 def test_state_registry_register_and_get_task_handler():
@@ -223,7 +223,7 @@ def test_state_registry_overwrite_handler():
 @pytest.mark.asyncio
 async def test_base_executor_execute_removes_completed():
     """Test that completed executions are removed."""
-    from pkg.machine import StateMachine
+    from src.machine import StateMachine
 
     executor = BaseExecutor()
 

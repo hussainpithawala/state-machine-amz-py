@@ -1,14 +1,14 @@
 [tool.poetry]
 name = "state-machine-amz-py"
 version = "0.1.0"
-description = "A powerful, extensible state machine implementation for Python applications"
-authors = ["Your Name <your.email@example.com>"]
+description = "A powerful, extensible Amazon states machine languaged based FSM implementation for Python applications"
+authors = ["Hussain Pithawala <hussainpithawala@gmail.com>"]
 license = "MIT"
 readme = "README.md"
 homepage = "https://github.com/hussainpithawala/state-machine-amz-py"
 repository = "https://github.com/hussainpithawala/state-machine-amz-py"
 documentation = "https://github.com/hussainpithawala/state-machine-amz-py#readme"
-keywords = ["state-machine", "finite-state-machine", "fsm", "workflow", "automation"]
+keywords = ["state-machine", "finite-state-machine", "fsm", "workflow", "automation", "amazon atate machine language"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -19,7 +19,7 @@ classifiers = [
 
 # Explicitly define packages
 packages = [
-    { include = "pkg", from = "." },
+    { include = "src", from = "." },
 ]
 
 [tool.poetry.dependencies]
@@ -67,4 +67,4 @@ testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
-addopts = "--cov=state_machine --cov-report=term-missing"
+addopts = "--cov=src --cov-report=term-missing"

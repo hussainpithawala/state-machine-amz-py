@@ -9,8 +9,8 @@ from typing import Any, Dict, Optional
 
 import pytest
 
-from pkg.states.base import CatchRule, RetryRule
-from pkg.states.task_state import TaskState
+from src.states.base import CatchRule, RetryRule
+from src.states.task_state import TaskState
 
 
 # Mock TaskHandler for testing
