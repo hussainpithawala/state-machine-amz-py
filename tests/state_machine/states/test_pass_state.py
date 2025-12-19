@@ -7,8 +7,8 @@ from unittest.mock import Mock
 
 import pytest
 
-from state_machine.states.base import StateError, get_path_processor, set_path_processor
-from state_machine.states.pass_state import PassState
+from pkg.states.base import StateError, get_path_processor, set_path_processor
+from pkg.states.pass_state import PassState
 
 
 class TestPassState:
@@ -598,7 +598,7 @@ class TestPassState:
     @pytest.mark.asyncio
     async def test_pass_state_integration_real_processor(self):
         """Test PassState integration with real processor."""
-        from state_machine.states.json_path import JSONPathProcessor
+        from pkg.states.json_path import JSONPathProcessor
 
         processor = JSONPathProcessor()
         state = PassState(name="IntegrationPass", next_state="NextState")
@@ -618,7 +618,7 @@ class TestPassState:
     @pytest.mark.asyncio
     async def test_pass_state_integration_with_result(self):
         """Test PassState integration with result injection."""
-        from state_machine.states.json_path import JSONPathProcessor
+        from pkg.states.json_path import JSONPathProcessor
 
         processor = JSONPathProcessor()
         result_data = {"injected": "value", "count": 42}

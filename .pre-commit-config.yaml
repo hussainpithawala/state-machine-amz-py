@@ -44,5 +44,5 @@ repos:
 #          (?x)^(
 #            tests/.* |
 #            other/test/path/.* |
-#            src/state_machine/states/json_path.py |
+#            src/pkg/states/json_path.py |
 #          )$

@@ -6,8 +6,8 @@ import json
 
 import pytest
 
-from state_machine.states.base import StateError
-from state_machine.states.fail_state import FailState
+from pkg.states.base import StateError
+from pkg.states.fail_state import FailState
 
 
 class TestFailState:

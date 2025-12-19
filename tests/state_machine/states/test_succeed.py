@@ -7,8 +7,8 @@ from unittest.mock import Mock
 
 import pytest
 
-from state_machine.states.base import StateError, get_path_processor, set_path_processor
-from state_machine.states.succeed import SucceedState
+from pkg.states.base import StateError, get_path_processor, set_path_processor
+from pkg.states.succeed import SucceedState
 
 
 class TestSucceedState:
@@ -518,7 +518,7 @@ class TestSucceedState:
     @pytest.mark.asyncio
     async def test_succeed_state_integration_real_processor(self):
         """Test SucceedState integration with real JsonPathNgProcessor."""
-        from state_machine.states.json_path import JSONPathProcessor
+        from pkg.states.json_path import JSONPathProcessor
 
         processor = JSONPathProcessor()
         state = SucceedState(name="IntegrationTest")
@@ -539,7 +539,7 @@ class TestSucceedState:
     @pytest.mark.asyncio
     async def test_succeed_state_integration_with_paths(self):
         """Test SucceedState integration with real processor and paths."""
-        from state_machine.states.json_path import JSONPathProcessor
+        from pkg.states.json_path import JSONPathProcessor
         processor = JSONPathProcessor()
         state = SucceedState(
             name="PathIntegration",
@@ -640,7 +640,7 @@ def test_string_ptr_helper():
 @pytest.mark.asyncio
 async def test_succeed_state_benchmark(benchmark):
     """Benchmark SucceedState execution."""
-    from state_machine.states.json_path import JSONPathProcessor
+    from pkg.states.json_path import JSONPathProcessor
 
     processor = JSONPathProcessor()
     state = SucceedState(name="BenchmarkSucceed")

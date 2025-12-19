@@ -19,7 +19,7 @@ classifiers = [
 
 # Explicitly define packages
 packages = [
-    { include = "state_machine", from = "." },
+    { include = "pkg", from = "." },
 ]
 
 [tool.poetry.dependencies]

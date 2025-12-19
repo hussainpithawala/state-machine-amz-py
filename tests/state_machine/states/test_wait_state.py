@@ -10,8 +10,8 @@ from unittest.mock import Mock
 
 import pytest
 
-from state_machine.states.base import StateError
-from state_machine.states.wait_state import WaitState
+from pkg.states.base import StateError
+from pkg.states.wait_state import WaitState
 
 
 class TestWaitState:
@@ -645,7 +645,7 @@ class TestWaitState:
     @pytest.mark.asyncio
     async def test_wait_state_integration_real_processor(self):
         """Test WaitState integration with real processor."""
-        from state_machine.states.json_path import JSONPathProcessor
+        from pkg.states.json_path import JSONPathProcessor
 
         processor = JSONPathProcessor()
         state = WaitState(name="IntegrationWait", next_state="Next", seconds=0)

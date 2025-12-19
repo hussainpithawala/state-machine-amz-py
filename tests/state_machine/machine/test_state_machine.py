@@ -9,8 +9,8 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from state_machine.execution import Execution
-from state_machine.machine.state_machine import StateMachine
+from pkg.execution import Execution
+from pkg.machine.state_machine import StateMachine
 
 
 class TestStateMachine():

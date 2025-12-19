@@ -6,8 +6,8 @@ import json
 
 import pytest
 
-from state_machine.states.base import StateError
-from state_machine.states.choice_state import ChoiceRule, ChoiceState
+from pkg.states.base import StateError
+from pkg.states.choice_state import ChoiceRule, ChoiceState
 
 
 class TestChoiceRule:

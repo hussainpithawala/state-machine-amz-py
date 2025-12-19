@@ -13,8 +13,8 @@ from datetime import datetime
 from typing import Any, Dict, Optional
 
 from examples import ExampleTaskHandler
-from state_machine.machine import StateMachine
-from state_machine.states import with_execution_context
+from pkg.machine import StateMachine
+from pkg.states import with_execution_context
 
 
 # Mock execution context

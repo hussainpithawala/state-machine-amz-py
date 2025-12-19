@@ -13,7 +13,7 @@ poetry run pytest tests/test_internal/test_json_path.py -v
 
 # Run with coverage
 ```bash
-poetry run pytest --cov=src.state_machine.__internal__.states tests/test_internal/
+poetry run pytest --cov=src.pkg.__internal__.states tests/test_internal/
 ```
 
 
