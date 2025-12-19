@@ -12,10 +12,9 @@ import time
 from datetime import datetime
 from typing import Any, Dict, Optional
 
+from examples import ExampleTaskHandler
 from src.machine import StateMachine
 from src.states import with_execution_context
-
-from . import ExampleTaskHandler
 
 
 # Mock execution context
@@ -44,7 +43,11 @@ async def demo_1_simple_greeting():
     exec_ctx = DemoExecutionContext()
 
     # Register greeting handler
-    async def greet_handler(input_data):
+    async def greet_handler(
+        resource: str,
+        input_data: Any,
+        parameters: Optional[Dict[str, Any]] = None,
+    ):
         print("👋 Greeting handler called")
         if isinstance(input_data, dict):
             input_data["greeting"] = f"Hello, {input_data.get('name', 'World')}!"
@@ -88,7 +91,11 @@ async def demo_2_processing_with_parameters():
     exec_ctx = DemoExecutionContext()
 
     # Register processor
-    async def process_handler(input_data):
+    async def process_handler(
+        resource: str,
+        input_data: Any,
+        parameters: Optional[Dict[str, Any]] = None,
+    ):
         print("⚙️  Processing handler called")
         if isinstance(input_data, dict):
             input_data["processed"] = True
@@ -139,7 +146,11 @@ async def demo_3_validation_success():
     exec_ctx = DemoExecutionContext()
 
     # Register validator
-    async def validate_handler(input_data):
+    async def validate_handler(
+        resource: str,
+        input_data: Any,
+        parameters: Optional[Dict[str, Any]] = None,
+    ):
         print("✅ Validation handler called")
         if not isinstance(input_data, dict):
             raise ValueError("validation failed: invalid input type")
@@ -189,15 +200,11 @@ async def demo_4_validation_failure():
         resource: str,
         input_data: Any,
         parameters: Optional[Dict[str, Any]] = None,
-        timeout_seconds: Optional[int] = None,
-        context: Optional[Dict[str, Any]] = None,
     ):
         print("✅ Validation handler called")
         print(f"resource {resource}")
         print(f"input_data {input_data}")
         print(f"parameters {parameters}")
-        print(f"timeout_seconds {timeout_seconds}")
-        print(f"context {context}")
 
         if not input_data.get("required"):
             raise ValueError("validation failed: required field missing")
@@ -259,15 +266,12 @@ async def demo_5_task_with_retry():
         resource: str,
         input_data: Any,
         parameters: Optional[Dict[str, Any]] = None,
-        timeout_seconds: Optional[int] = None,
-        context: Optional[Dict[str, Any]] = None,
     ):
         print(f"🎲 Flaky handler called (attempt {call_count['count']})")
 
         print(f"resource {resource}")
         print(f"input_data {input_data}")
         print(f"parameters {parameters}")
-        print(f"timeout_seconds {timeout_seconds}")
         print(f"context {context}")
 
         call_count["count"] += 1
@@ -326,19 +330,31 @@ async def demo_6_parallel_execution():
     exec_ctx = DemoExecutionContext()
 
     # Register parallel handlers
-    async def task_a(input_data):
+    async def task_a(
+        resource: str,
+        input_data: Any,
+        parameters: Optional[Dict[str, Any]] = None,
+    ):
         print("🔵 Task A starting...")
         await asyncio.sleep(0.5)
         print("🔵 Task A completed")
         return {"task": "A", "result": "success"}
 
-    async def task_b(input_data):
+    async def task_b(
+        resource: str,
+        input_data: Any,
+        parameters: Optional[Dict[str, Any]] = None,
+    ):
         print("🟢 Task B starting...")
         await asyncio.sleep(0.3)
         print("🟢 Task B completed")
         return {"task": "B", "result": "success"}
 
-    async def task_c(input_data):
+    async def task_c(
+        resource: str,
+        input_data: Any,
+        parameters: Optional[Dict[str, Any]] = None,
+    ):
         print("🟡 Task C starting...")
         await asyncio.sleep(0.4)
         print("🟡 Task C completed")
@@ -416,24 +432,40 @@ async def demo_7_complex_workflow():
     exec_ctx = DemoExecutionContext()
 
     # Register handlers
-    async def fetch_data(input_data):
+    async def fetch_data(
+        resource: str,
+        input_data: Any,
+        parameters: Optional[Dict[str, Any]] = None,
+    ):
         print("📥 Fetching data...")
         await asyncio.sleep(0.2)
         return {"data": [1, 2, 3, 4, 5], "source": "database"}
 
-    async def transform_data(input_data):
+    async def transform_data(
+        resource: str,
+        input_data: Any,
+        parameters: Optional[Dict[str, Any]] = None,
+    ):
         print("🔄 Transforming data...")
         await asyncio.sleep(0.3)
         data = input_data.get("data", [])
         return {"transformed": [x * 2 for x in data], "count": len(data)}
 
-    async def validate_result(input_data):
+    async def validate_result(
+        resource: str,
+        input_data: Any,
+        parameters: Optional[Dict[str, Any]] = None,
+    ):
         print("✅ Validating result...")
         if input_data.get("count", 0) > 0:
             return {"valid": True, "data": input_data}
         raise ValueError("No data to process")
 
-    async def save_result(input_data):
+    async def save_result(
+        resource: str,
+        input_data: Any,
+        parameters: Optional[Dict[str, Any]] = None,
+    ):
         print("💾 Saving result...")
         await asyncio.sleep(0.2)
         return {"saved": True, "id": "result-123"}

@@ -301,6 +301,8 @@ class TaskState(BaseState):
                     result = await handler.execute(
                         self.resource, task_input, self.parameters
                     )
+                elif callable(handler):
+                    result = await handler(self.resource, task_input, self.parameters)
                 else:
                     raise ValueError("Invalid task handler")
 

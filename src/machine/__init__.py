@@ -1,3 +1,20 @@
-from src.machine.state_machine import StateMachine
+"""State machine package with persistent execution support."""
 
-__all__ = [StateMachine]
+from .persistent_statemachine import (
+    PersistentContext,
+    PersistentStateMachine,
+    StateHistoryEntry,
+    StateMachine,
+)
+
+__all__ = [
+    # Core classes
+    "PersistentStateMachine",
+    "PersistentContext",
+    "StateHistoryEntry",
+    "StateMachine"
+    # State types
+    # Factory function
+]
+
+__version__ = "1.0.0"
