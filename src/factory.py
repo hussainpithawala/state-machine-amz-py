@@ -209,9 +209,51 @@ class StateFactory:
 
     def _create_choice_state(self, name: str, data: Dict[str, Any]) -> Any:
         """Create a Choice state."""
-        # Import Choice state (if implemented)
-        # For now, raise an error as Choice state is not yet implemented
-        raise NotImplementedError("Choice state not yet implemented")
+        from src.states.choice_state import ChoiceRule, ChoiceState
+
+        def parse_rule(rule_data: Dict[str, Any]) -> ChoiceRule:
+            rule = ChoiceRule(
+                variable=rule_data.get("Variable", ""),
+                next=rule_data.get("Next", ""),
+                string_equals=rule_data.get("StringEquals"),
+                string_less_than=rule_data.get("StringLessThan"),
+                string_greater_than=rule_data.get("StringGreaterThan"),
+                string_less_than_equals=rule_data.get("StringLessThanEquals"),
+                string_greater_than_equals=rule_data.get("StringGreaterThanEquals"),
+                numeric_equals=rule_data.get("NumericEquals"),
+                numeric_less_than=rule_data.get("NumericLessThan"),
+                numeric_greater_than=rule_data.get("NumericGreaterThan"),
+                numeric_less_than_equals=rule_data.get("NumericLessThanEquals"),
+                numeric_greater_than_equals=rule_data.get("NumericGreaterThanEquals"),
+                boolean_equals=rule_data.get("BooleanEquals"),
+                timestamp_equals=rule_data.get("TimestampEquals"),
+                timestamp_less_than=rule_data.get("TimestampLessThan"),
+                timestamp_greater_than=rule_data.get("TimestampGreaterThan"),
+                timestamp_less_than_equals=rule_data.get("TimestampLessThanEquals"),
+                timestamp_greater_than_equals=rule_data.get(
+                    "TimestampGreaterThanEquals"
+                ),
+                comment=rule_data.get("Comment"),
+            )
+            if "And" in rule_data:
+                rule.and_rules = [parse_rule(r) for r in rule_data["And"]]
+            if "Or" in rule_data:
+                rule.or_rules = [parse_rule(r) for r in rule_data["Or"]]
+            if "Not" in rule_data:
+                rule.not_rule = parse_rule(rule_data["Not"])
+            return rule
+
+        choices = [parse_rule(choice_data) for choice_data in data.get("Choices", [])]
+
+        return ChoiceState(
+            name=name,
+            choices=choices,
+            default=data.get("Default"),
+            input_path=data.get("InputPath"),
+            result_path=data.get("ResultPath"),
+            output_path=data.get("OutputPath"),
+            comment=data.get("Comment"),
+        )
 
     def register_creator(self, state_type: str, creator: callable) -> None:
         """
