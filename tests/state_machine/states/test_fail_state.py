@@ -400,7 +400,7 @@ async def test_fail_state_execute_different_input_types():
 
     for input_data, description in test_cases:
         with pytest.raises(
-                StateError, match="State: TypeTestFail | Error: State 'TypeTestFail' failed | Type: States.Failed"
+            StateError, match="State: TypeTestFail | Error: State 'TypeTestFail' failed | Type: States.Failed"
         ):
             await FailState(name="TypeTestFail", error="States.Failed").execute(input_data=input_data)
 
