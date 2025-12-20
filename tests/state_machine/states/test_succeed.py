@@ -581,7 +581,7 @@ async def test_succeed_state_benchmark(benchmark):
         return await state.execute(input_data)
 
     # Use pytest-benchmark if available
-    result = benchmark(run_execute)
+    benchmark(run_execute)
     output, next_state = await run_execute()
 
     assert output == input_data

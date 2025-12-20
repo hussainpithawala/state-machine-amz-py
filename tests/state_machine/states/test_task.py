@@ -356,7 +356,7 @@ def test_task_state_validate():
 
 def test_task_state_getters():
     """Test task state getters."""
-    with pytest.raises(ValueError, match="State cannot have both Next and End") as exec:
+    with pytest.raises(ValueError, match="State cannot have both Next and End"):
         TaskState(
             name="MyTaskState",
             resource="arn:aws:lambda:us-east-1:123456789012:function:MyFunction",

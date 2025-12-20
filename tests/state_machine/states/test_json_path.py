@@ -526,9 +526,9 @@ class TestJSONPathProcessor:
         # This test documents current behavior
 
         # For now, test with simple field names
-        value = processor.get_value(data, "$.field-with-dash")
         # This might fail depending on implementation
         #  or "not found" in error
+        assert processor.get_value(data, "$.field-with-dash") is not None
 
     def test_empty_objects_and_arrays(self, processor):
         """Test with empty objects and arrays."""

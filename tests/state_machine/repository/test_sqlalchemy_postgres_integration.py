@@ -6,7 +6,6 @@ from datetime import datetime, timedelta
 from typing import Optional
 
 import pytest
-from psycopg2.errorcodes import SQL_ROUTINE_EXCEPTION
 from sqlalchemy import text
 
 from src.repository.sqlalchemy_postgres import SQLAlchemyPostgresRepository

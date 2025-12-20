@@ -122,8 +122,8 @@ class TestChoiceState:
         """Test ChoiceState validation without choices or default."""
         state_name = "InvalidChoice"
         with pytest.raises(
-            ValueError, match=f"Choice state '{state_name}' must have either Choices or Default"
-        ) as exec:
+                ValueError, match=f"Choice state '{state_name}' must have either Choices or Default"
+        ):
             ChoiceState(name=state_name)
 
     def test_choice_state_validation_empty_name(self):

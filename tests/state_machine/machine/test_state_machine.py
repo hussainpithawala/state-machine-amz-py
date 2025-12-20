@@ -9,8 +9,8 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from src.execution import Execution
 from src.machine.state_machine import StateMachine
+from src.states.base import StateValidationError
 
 
 class TestStateMachine:
@@ -384,8 +384,10 @@ class TestStateMachine:
             }
         }"""
 
-        sm = StateMachine.from_json(definition)
-        # Should not raise
+        try:
+            StateMachine.from_json(definition)
+        except StateValidationError:
+            pytest.fail("Should'nt have raised the error while creating the state-machine")
 
     def test_validate_missing_start_at(self):
         """Test validation with missing StartAt."""

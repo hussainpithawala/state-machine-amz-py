@@ -203,29 +203,20 @@ class TestFailState:
     @pytest.mark.asyncio
     async def test_fail_state_execute_simple(self, sample_input_data):
         """Test simple FailState execution."""
-        with pytest.raises(StateError) as exc_info:
+        with pytest.raises(StateError):
             state = FailState(name="SimpleFail", error="States.TaskFailed", cause="Task execution failed")
-            output, next_state = await state.execute(sample_input_data)
-
-        # Verify results
-        # assert output is None  # Fail states produce no output
-        # assert next_state is None  # Fail states have no next state
-        # assert error is not None  # Must have an error
-        # assert isinstance(error, StateError)
-        # assert error.error_type == "States.TaskFailed"
-        # assert "Task execution failed" in str(error) or error.message == "Task execution failed"
-        # assert error.state_name == "SimpleFail"
+            await state.execute(sample_input_data)
 
     @pytest.mark.asyncio
     async def test_fail_state_execute_without_cause(self, sample_input_data):
         """Test FailState execution without cause."""
-        with pytest.raises(StateError) as exc_info:
+        with pytest.raises(StateError):
             await FailState(name="NoCauseFail", error="CustomError").execute(sample_input_data)
 
     @pytest.mark.asyncio
     async def test_fail_state_execute_with_context(self, sample_input_data):
         """Test FailState execution with context."""
-        with pytest.raises(StateError) as exc_info:
+        with pytest.raises(StateError):
             await FailState(name="ContextFail", error="States.Timeout", cause="Operation timed out").execute(
                 sample_input_data, {"execution_id": "test-123", "timestamp": "2024-01-15"}
             )
@@ -233,7 +224,7 @@ class TestFailState:
     @pytest.mark.asyncio
     async def test_fail_state_execute_nil_input(self):
         """Test FailState execution with None input."""
-        with pytest.raises(StateError) as exc_info:
+        with pytest.raises(StateError):
             await FailState(name="NilFail", error="States.Failed").execute(None)
 
     @pytest.mark.asyncio
@@ -242,7 +233,7 @@ class TestFailState:
         test_inputs = [sample_input_data, {"different": "data"}, None, "string", 42, []]
 
         for input_data in test_inputs:
-            with pytest.raises(StateError) as exec:
+            with pytest.raises(StateError):
                 # Execute with different inputs - should always fail the same way
                 await FailState(
                     name="IgnoreInputFail", error="States.Failed", cause="Failed regardless of input"
@@ -409,8 +400,8 @@ async def test_fail_state_execute_different_input_types():
 
     for input_data, description in test_cases:
         with pytest.raises(
-            StateError, match="State: TypeTestFail | Error: State 'TypeTestFail' failed | Type: States.Failed"
-        ) as exec:
+                StateError, match="State: TypeTestFail | Error: State 'TypeTestFail' failed | Type: States.Failed"
+        ):
             await FailState(name="TypeTestFail", error="States.Failed").execute(input_data=input_data)
 
 
@@ -506,7 +497,7 @@ async def test_fail_state_aws_standard_errors():
     ]
 
     for error_code, cause in aws_errors:
-        with pytest.raises(StateError, match=error_code) as error:
+        with pytest.raises(StateError, match=error_code):
             await FailState(name=f"Fail_{error_code}", error=error_code, cause=cause).execute({})
 
 
@@ -520,7 +511,7 @@ async def test_fail_state_multiple_executions():
 
     # Execute multiple times with different inputs
     for i in range(5):
-        with pytest.raises(StateError, match="States.Failed") as exec:
+        with pytest.raises(StateError, match="States.Failed"):
             await state.execute({"iteration": i})
 
 
@@ -531,9 +522,9 @@ async def test_fail_state_multiple_executions():
 async def test_fail_state_error_consistency():
     """Test that error details remain consistent across executions."""
     for index in [0, 1]:
-        with pytest.raises(StateError) as exec:
+        with pytest.raises(StateError) as except_:
             fail_state = FailState(name="ConsistentFail", error="CustomError", cause="Consistent error message")
             await fail_state.execute({"test": index + 1})
-        assert exec.value.error_type == fail_state.error
-        assert exec.value.state_name == fail_state.name
-        assert exec.value.message == fail_state.cause
+        assert except_.value.error_type == fail_state.error
+        assert except_.value.state_name == fail_state.name
+        assert except_.value.message == fail_state.cause
