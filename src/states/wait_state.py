@@ -77,9 +77,7 @@ class WaitState(BaseState):
         # Call parent validation
         self.validate()
 
-    async def execute(
-        self, input_data: Any, context: Optional[Dict[str, Any]] = None
-    ) -> Tuple[Any, Optional[str]]:
+    async def execute(self, input_data: Any, context: Optional[Dict[str, Any]] = None) -> Tuple[Any, Optional[str]]:
         """
         Execute the Wait state.
 
@@ -119,9 +117,7 @@ class WaitState(BaseState):
                     )
 
             # Apply result path (Wait state passes through input)
-            output = processor.apply_result_path(
-                processed_input, processed_input, self.result_path
-            )
+            output = processor.apply_result_path(processed_input, processed_input, self.result_path)
 
             # Process output path
             final_output = processor.apply_output_path(output, self.output_path)
@@ -180,9 +176,7 @@ class WaitState(BaseState):
                 error_type="States.Runtime",
             ) from e
 
-    def _calculate_seconds_path_wait(
-        self, processor: Any, processed_input: Any
-    ) -> float:
+    def _calculate_seconds_path_wait(self, processor: Any, processed_input: Any) -> float:
         """Calculate wait duration from seconds_path."""
         try:
             # Extract value from path
@@ -198,8 +192,7 @@ class WaitState(BaseState):
 
         except Exception as e:
             raise StateError(
-                f"Failed to extract SecondsPath "
-                f"'{self.seconds_path}' in state '{self.name}': {str(e)}",
+                f"Failed to extract SecondsPath " f"'{self.seconds_path}' in state '{self.name}': {str(e)}",
                 state_name=self.name,
                 error_type="States.Runtime",
             ) from e
@@ -219,15 +212,12 @@ class WaitState(BaseState):
 
         except Exception as e:
             raise StateError(
-                f"Failed to parse timestamp '{timestamp}' "
-                f"in state '{self.name}': {str(e)}",
+                f"Failed to parse timestamp '{timestamp}' " f"in state '{self.name}': {str(e)}",
                 state_name=self.name,
                 error_type="States.Runtime",
             ) from e
 
-    def _calculate_timestamp_path_wait(
-        self, processor: Any, processed_input: Any
-    ) -> float:
+    def _calculate_timestamp_path_wait(self, processor: Any, processed_input: Any) -> float:
         """Calculate wait duration from timestamp_path."""
         try:
             # Extract timestamp string from path
@@ -242,8 +232,7 @@ class WaitState(BaseState):
             raise
         except Exception as e:
             raise StateError(
-                f"Failed to extract TimestampPath '{self.timestamp_path}' "
-                f"in state '{self.name}': {str(e)}",
+                f"Failed to extract TimestampPath '{self.timestamp_path}' " f"in state '{self.name}': {str(e)}",
                 state_name=self.name,
                 error_type="States.Runtime",
             ) from e
@@ -280,9 +269,7 @@ class WaitState(BaseState):
                 continue
 
         # If none of the formats work, raise error
-        raise ValueError(
-            f"Invalid timestamp format: {timestamp}. Expected ISO-8601 format."
-        )
+        raise ValueError(f"Invalid timestamp format: {timestamp}. Expected ISO-8601 format.")
 
     def _to_number(self, value: Any) -> float:
         """
@@ -316,9 +303,7 @@ class WaitState(BaseState):
         """
         # Wait state specific validations
         if self.type != "Wait":
-            raise ValueError(
-                f"Wait state '{self.name}' must have Type 'Wait', " f"got '{self.type}'"
-            )
+            raise ValueError(f"Wait state '{self.name}' must have Type 'Wait', " f"got '{self.type}'")
 
         # Count how many wait methods are specified
         wait_methods_count = sum(
@@ -332,8 +317,7 @@ class WaitState(BaseState):
 
         if wait_methods_count == 0:
             raise ValueError(
-                f"Wait state '{self.name}' must specify one of: "
-                "Seconds, SecondsPath, Timestamp, or TimestampPath"
+                f"Wait state '{self.name}' must specify one of: " "Seconds, SecondsPath, Timestamp, or TimestampPath"
             )
 
         if wait_methods_count > 1:

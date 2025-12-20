@@ -25,21 +25,14 @@ class TestSucceedState:
     @pytest.fixture
     def sample_input_data(self):
         """Sample input data for testing."""
-        return {
-            "data": "input data",
-            "metadata": {"source": "test", "timestamp": "2024-01-15"}
-        }
+        return {"data": "input data", "metadata": {"source": "test", "timestamp": "2024-01-15"}}
 
     # Test initialization and basic properties
 
     def test_succeed_state_creation(self):
         """Test basic SucceedState creation."""
         state = SucceedState(
-            name="TestSucceedState",
-            input_path="$.data",
-            output_path="$.result",
-            comment="Test comment",
-            end=True
+            name="TestSucceedState", input_path="$.data", output_path="$.result", comment="Test comment", end=True
         )
 
         assert state.name == "TestSucceedState"
@@ -200,11 +193,7 @@ class TestSucceedState:
     @pytest.mark.asyncio
     async def test_succeed_state_execute_with_both_paths(self, mock_path_processor, sample_input_data):
         """Test SucceedState execution with both input and output paths."""
-        state = SucceedState(
-            name="CompleteSucceed",
-            input_path="$.data",
-            output_path="$.output"
-        )
+        state = SucceedState(name="CompleteSucceed", input_path="$.data", output_path="$.output")
         state.set_path_processor(mock_path_processor)
 
         await state.execute(sample_input_data)
@@ -220,12 +209,11 @@ class TestSucceedState:
 
         context = {"execution_id": "test-123", "timestamp": "2024-01-15"}
 
-        output, next_state =  await state.execute(sample_input_data, context)
+        output, next_state = await state.execute(sample_input_data, context)
 
         # Context should be ignored by SucceedState
         assert output == "final_output"
         assert next_state is None
-
 
     @pytest.mark.asyncio
     async def test_succeed_state_execute_path_processing_error(self, sample_input_data):
@@ -246,12 +234,11 @@ class TestSucceedState:
         state = SucceedState(name="SucceedWithNil")
         state.set_path_processor(mock_path_processor)
 
-        output, next_state =  await state.execute(None)
+        output, next_state = await state.execute(None)
 
         mock_path_processor.apply_input_path.assert_called_once_with(None, None)
         assert output == "final_output"
         assert next_state is None
-
 
     @pytest.mark.asyncio
     async def test_succeed_state_execute_uses_default_processor(self, sample_input_data):
@@ -303,10 +290,7 @@ class TestSucceedState:
 
         result = state.to_dict()
 
-        assert result == {
-            "Type": "Succeed",
-            "InputPath": "$.data"
-        }
+        assert result == {"Type": "Succeed", "InputPath": "$.data"}
         assert "OutputPath" not in result
         assert "Comment" not in result
 
@@ -316,10 +300,7 @@ class TestSucceedState:
 
         result = state.to_dict()
 
-        assert result == {
-            "Type": "Succeed",
-            "OutputPath": "$.result"
-        }
+        assert result == {"Type": "Succeed", "OutputPath": "$.result"}
         assert "InputPath" not in result
         assert "Comment" not in result
 
@@ -329,20 +310,14 @@ class TestSucceedState:
 
         result = state.to_dict()
 
-        assert result == {
-            "Type": "Succeed",
-            "Comment": "Successful completion"
-        }
+        assert result == {"Type": "Succeed", "Comment": "Successful completion"}
         assert "InputPath" not in result
         assert "OutputPath" not in result
 
     def test_succeed_state_to_dict_complete(self):
         """Test to_dict with all allowed fields."""
         state = SucceedState(
-            name="CompleteSucceed",
-            input_path="$.input",
-            output_path="$.output",
-            comment="Complete succeed state"
+            name="CompleteSucceed", input_path="$.input", output_path="$.output", comment="Complete succeed state"
         )
 
         result = state.to_dict()
@@ -351,7 +326,7 @@ class TestSucceedState:
             "Type": "Succeed",
             "InputPath": "$.input",
             "OutputPath": "$.output",
-            "Comment": "Complete succeed state"
+            "Comment": "Complete succeed state",
         }
         # Verify disallowed fields are not present
         assert "Next" not in result
@@ -362,20 +337,12 @@ class TestSucceedState:
 
     def test_succeed_state_to_json(self):
         """Test to_json method."""
-        state = SucceedState(
-            name="JsonSucceed",
-            input_path="$.data",
-            comment="JSON test"
-        )
+        state = SucceedState(name="JsonSucceed", input_path="$.data", comment="JSON test")
 
         json_str = state.to_json()
         result = json.loads(json_str)
 
-        assert result == {
-            "Type": "Succeed",
-            "InputPath": "$.data",
-            "Comment": "JSON test"
-        }
+        assert result == {"Type": "Succeed", "InputPath": "$.data", "Comment": "JSON test"}
 
     def test_succeed_state_to_json_indented(self):
         """Test to_json with indentation."""
@@ -405,12 +372,7 @@ class TestSucceedState:
 
     def test_succeed_state_repr(self):
         """Test detailed representation."""
-        state = SucceedState(
-            name="TestSucceed",
-            input_path="$.input",
-            output_path="$.output",
-            comment="Test state"
-        )
+        state = SucceedState(name="TestSucceed", input_path="$.input", output_path="$.output", comment="Test state")
 
         repr_str = repr(state)
         assert "SucceedState" in repr_str
@@ -428,12 +390,11 @@ class TestSucceedState:
         state.set_path_processor(mock_path_processor)
 
         empty_input = {}
-        output, next_state =  await state.execute(empty_input)
+        output, next_state = await state.execute(empty_input)
 
         mock_path_processor.apply_input_path.assert_called_once_with(empty_input, None)
         assert output == "final_output"
         assert next_state is None
-
 
     @pytest.mark.asyncio
     async def test_succeed_state_execute_different_input_types(self, mock_path_processor):
@@ -455,7 +416,7 @@ class TestSucceedState:
         for input_data, description in test_cases:
             mock_path_processor.reset_mock()
 
-            output, next_state =  await state.execute(input_data)
+            output, next_state = await state.execute(input_data)
 
             mock_path_processor.apply_input_path.assert_called_once_with(input_data, None)
             assert output == "final_output", f"Failed for {description}"
@@ -481,37 +442,25 @@ class TestSucceedState:
         mock_processor.apply_output_path = Mock(side_effect=apply_output_path)
 
         # Create state with paths
-        state = SucceedState(
-            name="TransactionSummary",
-            input_path="$.transaction",
-            output_path="$.summary"
-        )
+        state = SucceedState(name="TransactionSummary", input_path="$.transaction", output_path="$.summary")
         state.set_path_processor(mock_processor)
 
         # Complex input data
         input_data = {
-            "transaction": {
-                "id": "txn_12345",
-                "amount": 100.50,
-                "currency": "USD",
-                "status": "completed"
-            },
+            "transaction": {"id": "txn_12345", "amount": 100.50, "currency": "USD", "status": "completed"},
             "user": {"id": "user_67890", "email": "test@example.com"},
-            "metadata": {"processed": True, "version": "1.0"}
+            "metadata": {"processed": True, "version": "1.0"},
         }
 
-        output, next_state =  await state.execute(input_data)
+        output, next_state = await state.execute(input_data)
 
         # Verify calls
         mock_processor.apply_input_path.assert_called_once_with(input_data, "$.transaction")
-        mock_processor.apply_output_path.assert_called_once_with(
-            input_data["transaction"], "$.summary"
-        )
+        mock_processor.apply_output_path.assert_called_once_with(input_data["transaction"], "$.summary")
 
         # Verify output structure
         assert output == {"summary": input_data["transaction"]}
         assert next_state is None
-
 
     # Test integration with actual JsonPathNgProcessor
 
@@ -524,41 +473,30 @@ class TestSucceedState:
         state = SucceedState(name="IntegrationTest")
         state.set_path_processor(processor)
 
-        input_data = {
-            "user": {"name": "John", "age": 30},
-            "metadata": {"source": "test"}
-        }
+        input_data = {"user": {"name": "John", "age": 30}, "metadata": {"source": "test"}}
 
-        output, next_state =  await state.execute(input_data)
+        output, next_state = await state.execute(input_data)
 
         # With no paths, output should be same as input
         assert output == input_data
         assert next_state is None
 
-
     @pytest.mark.asyncio
     async def test_succeed_state_integration_with_paths(self):
         """Test SucceedState integration with real processor and paths."""
         from src.states.json_path import JSONPathProcessor
+
         processor = JSONPathProcessor()
-        state = SucceedState(
-            name="PathIntegration",
-            input_path="$.user.name",
-            output_path="$.username"
-        )
+        state = SucceedState(name="PathIntegration", input_path="$.user.name", output_path="$.username")
         state.set_path_processor(processor)
 
-        input_data = {
-            "user": {"name": "Alice", "age": 25},
-            "other": "data"
-        }
+        input_data = {"user": {"name": "Alice", "age": 25}, "other": "data"}
 
-        output, next_state =  await state.execute(input_data)
+        output, next_state = await state.execute(input_data)
 
         # Should extract name and wrap in "username" field
         assert output == {"username": "Alice"}
         assert next_state is None
-
 
     # Test that SucceedState inherits from BaseState correctly
 
@@ -616,13 +554,15 @@ class TestSucceedState:
             assert output["data"] == f"task_{i}"
             assert next_state is None
 
-
         # Verify processor was called correct number of times
         assert mock_processor.apply_input_path.call_count == num_tasks
         assert mock_processor.apply_output_path.call_count == num_tasks
+
+
 # Test helper functions
 
 # Benchmark tests (optional - run with pytest -m benchmark)
+
 
 @pytest.mark.benchmark
 @pytest.mark.asyncio
@@ -634,13 +574,7 @@ async def test_succeed_state_benchmark(benchmark):
     state = SucceedState(name="BenchmarkSucceed")
     state.set_path_processor(processor)
 
-    input_data = {
-        "test": "data",
-        "nested": {
-            "level1": {"level2": "value"},
-            "array": [1, 2, 3, 4, 5]
-        }
-    }
+    input_data = {"test": "data", "nested": {"level1": {"level2": "value"}, "array": [1, 2, 3, 4, 5]}}
 
     # Run benchmark
     async def run_execute():
@@ -648,7 +582,7 @@ async def test_succeed_state_benchmark(benchmark):
 
     # Use pytest-benchmark if available
     result = benchmark(run_execute)
-    output, next_state =  await run_execute()
+    output, next_state = await run_execute()
 
     assert output == input_data
     assert next_state is None

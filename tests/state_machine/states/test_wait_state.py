@@ -30,22 +30,13 @@ class TestWaitState:
     @pytest.fixture
     def sample_input_data(self):
         """Sample input data for testing."""
-        return {
-            "key": "value",
-            "duration": 1,
-            "data": "test"
-        }
+        return {"key": "value", "duration": 1, "data": "test"}
 
     # Test initialization and basic properties
 
     def test_wait_state_creation_with_seconds(self):
         """Test basic WaitState creation with Seconds."""
-        state = WaitState(
-            name="TestWaitState",
-            next_state="NextState",
-            seconds=5,
-            comment="Test wait state"
-        )
+        state = WaitState(name="TestWaitState", next_state="NextState", seconds=5, comment="Test wait state")
 
         assert state.name == "TestWaitState"
         assert state.type == "Wait"
@@ -58,11 +49,7 @@ class TestWaitState:
 
     def test_wait_state_creation_with_seconds_path(self):
         """Test WaitState creation with SecondsPath."""
-        state = WaitState(
-            name="WaitWithPath",
-            next_state="NextState",
-            seconds_path="$.duration"
-        )
+        state = WaitState(name="WaitWithPath", next_state="NextState", seconds_path="$.duration")
 
         assert state.seconds is None
         assert state.seconds_path == "$.duration"
@@ -72,11 +59,7 @@ class TestWaitState:
     def test_wait_state_creation_with_timestamp(self):
         """Test WaitState creation with Timestamp."""
         timestamp = "2025-12-31T23:59:59Z"
-        state = WaitState(
-            name="WaitUntil",
-            end=True,
-            timestamp=timestamp
-        )
+        state = WaitState(name="WaitUntil", end=True, timestamp=timestamp)
 
         assert state.seconds is None
         assert state.seconds_path is None
@@ -86,11 +69,7 @@ class TestWaitState:
 
     def test_wait_state_creation_with_timestamp_path(self):
         """Test WaitState creation with TimestampPath."""
-        state = WaitState(
-            name="WaitUntilPath",
-            next_state="NextState",
-            timestamp_path="$.waitUntil"
-        )
+        state = WaitState(name="WaitUntilPath", next_state="NextState", timestamp_path="$.waitUntil")
 
         assert state.seconds is None
         assert state.seconds_path is None
@@ -118,20 +97,12 @@ class TestWaitState:
 
     def test_wait_state_validation_valid_timestamp(self):
         """Test validation with valid Timestamp."""
-        state = WaitState(
-            name="ValidWait",
-            next_state="Next",
-            timestamp="2025-12-31T23:59:59Z"
-        )
+        state = WaitState(name="ValidWait", next_state="Next", timestamp="2025-12-31T23:59:59Z")
         state.validate()  # Should not raise
 
     def test_wait_state_validation_valid_timestamp_path(self):
         """Test validation with valid TimestampPath."""
-        state = WaitState(
-            name="ValidWait",
-            next_state="Next",
-            timestamp_path="$.timestamp"
-        )
+        state = WaitState(name="ValidWait", next_state="Next", timestamp_path="$.timestamp")
         state.validate()  # Should not raise
 
     def test_wait_state_validation_no_wait_method(self):
@@ -142,12 +113,7 @@ class TestWaitState:
     def test_wait_state_validation_multiple_wait_methods(self):
         """Test validation with multiple wait methods."""
         with pytest.raises(ValueError, match="must specify only one of"):
-            WaitState(
-                name="InvalidWait",
-                next_state="Next",
-                seconds=5,
-                seconds_path="$.duration"
-            ).validate()
+            WaitState(name="InvalidWait", next_state="Next", seconds=5, seconds_path="$.duration").validate()
 
     def test_wait_state_validation_negative_seconds(self):
         """Test validation with negative Seconds."""
@@ -228,7 +194,7 @@ class TestWaitState:
         input_data = {"duration": 1, "key": "value"}
 
         start_time = time.time()
-        output, next_state =  await state.execute(input_data)
+        output, next_state = await state.execute(input_data)
         elapsed = time.time() - start_time
 
         assert output == input_data
@@ -248,9 +214,8 @@ class TestWaitState:
         input_data = {"duration": 0.5}
 
         start_time = time.time()
-        output, next_state =  await state.execute(input_data)
+        output, next_state = await state.execute(input_data)
         elapsed = time.time() - start_time
-
 
         assert elapsed >= 0.5
         assert elapsed < 1.0
@@ -326,11 +291,7 @@ class TestWaitState:
     @pytest.mark.asyncio
     async def test_wait_state_execute_with_invalid_timestamp(self, mock_path_processor, sample_input_data):
         """Test WaitState execution with invalid Timestamp format."""
-        state = WaitState(
-            name="WaitInvalidTimestamp",
-            next_state="Next",
-            timestamp="not-a-timestamp"
-        )
+        state = WaitState(name="WaitInvalidTimestamp", next_state="Next", timestamp="not-a-timestamp")
         state.set_path_processor(mock_path_processor)
 
         with pytest.raises(StateError, match="Failed to parse timestamp"):
@@ -349,7 +310,6 @@ class TestWaitState:
         output, next_state = await state.execute(sample_input_data)
         elapsed = time.time() - start_time
 
-
         assert elapsed >= 0.4  # Allow tolerance
 
     # Test execute method with TimestampPath
@@ -360,11 +320,7 @@ class TestWaitState:
         future_time = datetime.now(timezone.utc) + timedelta(seconds=2)
         timestamp = future_time.strftime("%Y-%m-%dT%H:%M:%SZ")
 
-        state = WaitState(
-            name="WaitTimestampPath",
-            next_state="NextState",
-            timestamp_path="$.waitUntil"
-        )
+        state = WaitState(name="WaitTimestampPath", next_state="NextState", timestamp_path="$.waitUntil")
 
         mock_path_processor.get = Mock(return_value=timestamp)
         state.set_path_processor(mock_path_processor)
@@ -372,7 +328,7 @@ class TestWaitState:
         input_data = {"waitUntil": timestamp, "data": "test"}
 
         start_time = time.time()
-        output, next_state =  await state.execute(input_data)
+        output, next_state = await state.execute(input_data)
         elapsed = time.time() - start_time
 
         assert output == input_data
@@ -383,11 +339,7 @@ class TestWaitState:
     @pytest.mark.asyncio
     async def test_wait_state_execute_timestamp_path_not_string(self, mock_path_processor):
         """Test WaitState execution with TimestampPath returning non-string."""
-        state = WaitState(
-            name="WaitInvalidPath",
-            next_state="Next",
-            timestamp_path="$.timestamp"
-        )
+        state = WaitState(name="WaitInvalidPath", next_state="Next", timestamp_path="$.timestamp")
 
         mock_path_processor.get = Mock(return_value=12345)
         state.set_path_processor(mock_path_processor)
@@ -422,54 +374,36 @@ class TestWaitState:
     @pytest.mark.asyncio
     async def test_wait_state_execute_with_input_path(self, mock_path_processor):
         """Test WaitState execution with input path."""
-        state = WaitState(
-            name="WaitInputPath",
-            next_state="Next",
-            seconds=0,
-            input_path="$.data"
-        )
+        state = WaitState(name="WaitInputPath", next_state="Next", seconds=0, input_path="$.data")
 
         mock_path_processor.apply_input_path = Mock(return_value={"filtered": "data"})
         state.set_path_processor(mock_path_processor)
 
         input_data = {"data": {"filtered": "data"}, "other": "ignored"}
 
-        output, next_state =  await state.execute(input_data)
+        output, next_state = await state.execute(input_data)
 
         mock_path_processor.apply_input_path.assert_called_once_with(input_data, "$.data")
-
 
     @pytest.mark.asyncio
     async def test_wait_state_execute_with_result_path(self, mock_path_processor, sample_input_data):
         """Test WaitState execution with result path."""
-        state = WaitState(
-            name="WaitResultPath",
-            next_state="Next",
-            seconds=0,
-            result_path="$.result"
-        )
+        state = WaitState(name="WaitResultPath", next_state="Next", seconds=0, result_path="$.result")
         state.set_path_processor(mock_path_processor)
 
         output, next_state = await state.execute(sample_input_data)
 
         mock_path_processor.apply_result_path.assert_called_once()
 
-
     @pytest.mark.asyncio
     async def test_wait_state_execute_with_output_path(self, mock_path_processor, sample_input_data):
         """Test WaitState execution with output path."""
-        state = WaitState(
-            name="WaitOutputPath",
-            next_state="Next",
-            seconds=0,
-            output_path="$.output"
-        )
+        state = WaitState(name="WaitOutputPath", next_state="Next", seconds=0, output_path="$.output")
         state.set_path_processor(mock_path_processor)
 
         output, next_state = await state.execute(sample_input_data)
 
         mock_path_processor.apply_output_path.assert_called_once()
-
 
     # Test to_dict method
 
@@ -479,11 +413,7 @@ class TestWaitState:
 
         result = state.to_dict()
 
-        assert result == {
-            "Type": "Wait",
-            "Next": "Next",
-            "Seconds": 5
-        }
+        assert result == {"Type": "Wait", "Next": "Next", "Seconds": 5}
 
     def test_wait_state_to_dict_with_seconds_path(self):
         """Test to_dict with SecondsPath."""
@@ -491,11 +421,7 @@ class TestWaitState:
 
         result = state.to_dict()
 
-        assert result == {
-            "Type": "Wait",
-            "Next": "Next",
-            "SecondsPath": "$.duration"
-        }
+        assert result == {"Type": "Wait", "Next": "Next", "SecondsPath": "$.duration"}
 
     def test_wait_state_to_dict_with_timestamp(self):
         """Test to_dict with Timestamp."""
@@ -504,27 +430,15 @@ class TestWaitState:
 
         result = state.to_dict()
 
-        assert result == {
-            "Type": "Wait",
-            "End": True,
-            "Timestamp": timestamp
-        }
+        assert result == {"Type": "Wait", "End": True, "Timestamp": timestamp}
 
     def test_wait_state_to_dict_with_timestamp_path(self):
         """Test to_dict with TimestampPath."""
-        state = WaitState(
-            name="WaitUntilPath",
-            next_state="Next",
-            timestamp_path="$.waitUntil"
-        )
+        state = WaitState(name="WaitUntilPath", next_state="Next", timestamp_path="$.waitUntil")
 
         result = state.to_dict()
 
-        assert result == {
-            "Type": "Wait",
-            "Next": "Next",
-            "TimestampPath": "$.waitUntil"
-        }
+        assert result == {"Type": "Wait", "Next": "Next", "TimestampPath": "$.waitUntil"}
 
     def test_wait_state_to_dict_complete(self):
         """Test to_dict with all allowed fields."""
@@ -535,7 +449,7 @@ class TestWaitState:
             result_path="$.result",
             output_path="$.output",
             seconds=10,
-            comment="Complete wait state"
+            comment="Complete wait state",
         )
 
         result = state.to_dict()
@@ -547,7 +461,7 @@ class TestWaitState:
             "ResultPath": "$.result",
             "OutputPath": "$.output",
             "Seconds": 10,
-            "Comment": "Complete wait state"
+            "Comment": "Complete wait state",
         }
 
     # Test to_json method
@@ -559,11 +473,7 @@ class TestWaitState:
         json_str = state.to_json()
         result = json.loads(json_str)
 
-        assert result == {
-            "Type": "Wait",
-            "Next": "Next",
-            "Seconds": 5
-        }
+        assert result == {"Type": "Wait", "Next": "Next", "Seconds": 5}
 
     def test_wait_state_to_json_indented(self):
         """Test to_json with indentation."""
@@ -626,8 +536,7 @@ class TestWaitState:
 
         context = {"execution_id": "test-123"}
 
-        output, next_state =  await state.execute(sample_input_data, context)
-
+        output, next_state = await state.execute(sample_input_data, context)
 
         assert output == sample_input_data
 
@@ -637,8 +546,7 @@ class TestWaitState:
         state = WaitState(name="NilWait", next_state="Next", seconds=0)
         state.set_path_processor(mock_path_processor)
 
-        output, next_state =  await state.execute(None)
-
+        output, next_state = await state.execute(None)
 
         assert output is None
 
@@ -653,11 +561,10 @@ class TestWaitState:
 
         input_data = {"key": "value"}
 
-        output, next_state =  await state.execute(input_data)
+        output, next_state = await state.execute(input_data)
 
         assert output == input_data
         assert next_state == "Next"
-
 
     # Test inheritance
 
@@ -706,7 +613,6 @@ class TestWaitState:
             assert output["id"] == i
             assert next_state == "Next"
 
-
     # Test timestamp parsing formats
 
     @pytest.mark.asyncio
@@ -733,7 +639,6 @@ class TestWaitState:
             state.set_path_processor(mock_path_processor)
 
             output, next_state = await state.execute(sample_input_data)
-
 
     # Test helper methods
 

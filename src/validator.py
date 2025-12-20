@@ -59,9 +59,7 @@ class StateMachineValidator:
         # Check for unreachable states
         self._validate_reachability(start_at, states)
 
-    def _validate_state(
-        self, state_name: str, state: Any, all_states: Dict[str, Any]
-    ) -> None:
+    def _validate_state(self, state_name: str, state: Any, all_states: Dict[str, Any]) -> None:
         """
         Validate a single state.
 
@@ -78,15 +76,11 @@ class StateMachineValidator:
 
         if state_type not in terminal_types:
             if not state.is_end() and state.get_next() is None:
-                raise ValueError(
-                    f"State '{state_name}' must have either Next or End set"
-                )
+                raise ValueError(f"State '{state_name}' must have either Next or End set")
 
             # Cannot have both End and Next
             if state.is_end() and state.get_next() is not None:
-                raise ValueError(
-                    f"State '{state_name}' cannot have both Next and End set"
-                )
+                raise ValueError(f"State '{state_name}' cannot have both Next and End set")
 
     def _validate_terminal_states(self, states: Dict[str, Any]) -> None:
         """
@@ -121,16 +115,12 @@ class StateMachineValidator:
             # Check Next reference
             next_state = state.get_next()
             if next_state is not None and next_state not in states:
-                raise ValueError(
-                    f"State '{state_name}' references non-existent state '{next_state}'"
-                )
+                raise ValueError(f"State '{state_name}' references non-existent state '{next_state}'")
 
             # Check state-specific references
             self._validate_state_specific_references(state_name, state, states)
 
-    def _validate_state_specific_references(
-        self, state_name: str, state: Any, all_states: Dict[str, Any]
-    ) -> None:
+    def _validate_state_specific_references(self, state_name: str, state: Any, all_states: Dict[str, Any]) -> None:
         """
         Validate state-specific references (e.g., Choice, Parallel).
 
@@ -145,17 +135,13 @@ class StateMachineValidator:
         if state_type == "Choice":
             if hasattr(state, "default") and state.default:
                 if state.default not in all_states:
-                    raise ValueError(
-                        f"Choice state '{state_name}' default '{state.default}' "
-                        "not found"
-                    )
+                    raise ValueError(f"Choice state '{state_name}' default '{state.default}' " "not found")
 
             if hasattr(state, "choices"):
                 for i, choice in enumerate(state.choices):
                     if hasattr(choice, "next") and choice.next not in all_states:
                         raise ValueError(
-                            f"Choice state '{state_name}' choice {i} "
-                            f"references non-existent state '{choice.next}'"
+                            f"Choice state '{state_name}' choice {i} " f"references non-existent state '{choice.next}'"
                         )
 
         # Validate Task state Catch
@@ -163,8 +149,7 @@ class StateMachineValidator:
             for i, catch in enumerate(state.catch):
                 if catch.next_state not in all_states:
                     raise ValueError(
-                        f"Task state '{state_name}' catch {i} "
-                        f"references non-existent state '{catch.next_state}'"
+                        f"Task state '{state_name}' catch {i} " f"references non-existent state '{catch.next_state}'"
                     )
 
     def _validate_reachability(self, start_at: str, states: Dict[str, Any]) -> None:

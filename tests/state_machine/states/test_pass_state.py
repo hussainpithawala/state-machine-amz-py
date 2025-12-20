@@ -26,11 +26,7 @@ class TestPassState:
     @pytest.fixture
     def sample_input_data(self):
         """Sample input data for testing."""
-        return {
-            "data": "input data",
-            "metadata": {"source": "test", "timestamp": "2024-01-15"},
-            "count": 42
-        }
+        return {"data": "input data", "metadata": {"source": "test", "timestamp": "2024-01-15"}, "count": 42}
 
     # Test initialization and basic properties
 
@@ -41,7 +37,7 @@ class TestPassState:
             next_state="NextState",
             input_path="$.data",
             output_path="$.result",
-            comment="Test comment"
+            comment="Test comment",
         )
 
         assert state.name == "TestPassState"
@@ -66,11 +62,7 @@ class TestPassState:
     def test_pass_state_with_result(self):
         """Test PassState with static result."""
         result_data = {"status": "success", "value": 100}
-        state = PassState(
-            name="ResultPass",
-            next_state="NextState",
-            result=result_data
-        )
+        state = PassState(name="ResultPass", next_state="NextState", result=result_data)
 
         assert state.result == result_data
         assert state.parameters is None
@@ -78,11 +70,7 @@ class TestPassState:
     def test_pass_state_with_parameters(self):
         """Test PassState with parameters."""
         params = {"key.$": "$.data", "static": "value"}
-        state = PassState(
-            name="ParamsPass",
-            next_state="NextState",
-            parameters=params
-        )
+        state = PassState(name="ParamsPass", next_state="NextState", parameters=params)
 
         assert state.parameters == params
         assert state.result is None
@@ -185,10 +173,7 @@ class TestPassState:
         """Test validation with both Result and Parameters."""
         with pytest.raises(ValueError, match="cannot have both Result and Parameters"):
             pass_state = PassState(
-                name="InvalidPass",
-                next_state="Next",
-                result={"key": "value"},
-                parameters={"param": "value"}
+                name="InvalidPass", next_state="Next", result={"key": "value"}, parameters={"param": "value"}
             )
             pass_state.validate()
 
@@ -214,64 +199,45 @@ class TestPassState:
         assert output == sample_input_data
         assert next_state == "NextState"
 
-
     @pytest.mark.asyncio
     async def test_pass_state_execute_with_result(self, mock_path_processor, sample_input_data):
         """Test PassState execution with static result."""
         result_data = {"status": "processed", "value": 123}
-        state = PassState(
-            name="ResultPass",
-            next_state="NextState",
-            result=result_data
-        )
+        state = PassState(name="ResultPass", next_state="NextState", result=result_data)
         state.set_path_processor(mock_path_processor)
 
         output, next_state = await state.execute(sample_input_data)
 
         # Verify processor calls
         mock_path_processor.apply_input_path.assert_called_once_with(sample_input_data, None)
-        mock_path_processor.apply_result_path.assert_called_once_with(
-            "processed_input", result_data, None
-        )
+        mock_path_processor.apply_result_path.assert_called_once_with("processed_input", result_data, None)
         mock_path_processor.apply_output_path.assert_called_once_with("combined_data", None)
 
         # Verify results
         assert output == "final_output"
         assert next_state == "NextState"
 
-
     @pytest.mark.asyncio
     async def test_pass_state_execute_with_parameters(self, mock_path_processor, sample_input_data):
         """Test PassState execution with parameters."""
         params = {"key": "value", "number": 42}
-        state = PassState(
-            name="ParamsPass",
-            next_state="NextState",
-            parameters=params
-        )
+        state = PassState(name="ParamsPass", next_state="NextState", parameters=params)
         state.set_path_processor(mock_path_processor)
 
         output, next_state = await state.execute(sample_input_data)
 
         # Verify processor calls
         mock_path_processor.apply_input_path.assert_called_once()
-        mock_path_processor.apply_result_path.assert_called_once_with(
-            "processed_input", params, None
-        )
+        mock_path_processor.apply_result_path.assert_called_once_with("processed_input", params, None)
         mock_path_processor.apply_output_path.assert_called_once()
 
         assert output == "final_output"
         assert next_state == "NextState"
 
-
     @pytest.mark.asyncio
     async def test_pass_state_execute_with_input_path(self, mock_path_processor, sample_input_data):
         """Test PassState execution with input path."""
-        state = PassState(
-            name="InputPathPass",
-            next_state="NextState",
-            input_path="$.data"
-        )
+        state = PassState(name="InputPathPass", next_state="NextState", input_path="$.data")
         state.set_path_processor(mock_path_processor)
 
         await state.execute(sample_input_data)
@@ -281,11 +247,7 @@ class TestPassState:
     @pytest.mark.asyncio
     async def test_pass_state_execute_with_output_path(self, mock_path_processor, sample_input_data):
         """Test PassState execution with output path."""
-        state = PassState(
-            name="OutputPathPass",
-            next_state="NextState",
-            output_path="$.result"
-        )
+        state = PassState(name="OutputPathPass", next_state="NextState", output_path="$.result")
         state.set_path_processor(mock_path_processor)
 
         await state.execute(sample_input_data)
@@ -296,19 +258,12 @@ class TestPassState:
     async def test_pass_state_execute_with_result_path(self, mock_path_processor, sample_input_data):
         """Test PassState execution with result path."""
         result_data = {"new": "data"}
-        state = PassState(
-            name="ResultPathPass",
-            next_state="NextState",
-            result=result_data,
-            result_path="$.output"
-        )
+        state = PassState(name="ResultPathPass", next_state="NextState", result=result_data, result_path="$.output")
         state.set_path_processor(mock_path_processor)
 
         await state.execute(sample_input_data)
 
-        mock_path_processor.apply_result_path.assert_called_once_with(
-            "processed_input", result_data, "$.output"
-        )
+        mock_path_processor.apply_result_path.assert_called_once_with("processed_input", result_data, "$.output")
 
     @pytest.mark.asyncio
     async def test_pass_state_execute_with_all_paths(self, mock_path_processor, sample_input_data):
@@ -320,16 +275,14 @@ class TestPassState:
             input_path="$.data",
             result_path="$.result",
             output_path="$.final",
-            result=result_data
+            result=result_data,
         )
         state.set_path_processor(mock_path_processor)
 
         await state.execute(sample_input_data)
 
         mock_path_processor.apply_input_path.assert_called_once_with(sample_input_data, "$.data")
-        mock_path_processor.apply_result_path.assert_called_once_with(
-            "processed_input", result_data, "$.result"
-        )
+        mock_path_processor.apply_result_path.assert_called_once_with("processed_input", result_data, "$.result")
         mock_path_processor.apply_output_path.assert_called_once_with("combined_data", "$.final")
 
     @pytest.mark.asyncio
@@ -340,11 +293,10 @@ class TestPassState:
 
         context = {"execution_id": "test-123", "timestamp": "2024-01-15"}
 
-        output, next_state =  await state.execute(sample_input_data, context)
+        output, next_state = await state.execute(sample_input_data, context)
 
         assert output == "final_output"
         assert next_state == "NextState"
-
 
     @pytest.mark.asyncio
     async def test_pass_state_execute_end_state(self, mock_path_processor, sample_input_data):
@@ -356,7 +308,6 @@ class TestPassState:
 
         assert output == "final_output"
         assert next_state is None  # End state has no next
-
 
     @pytest.mark.asyncio
     async def test_pass_state_execute_path_processing_error(self, sample_input_data):
@@ -376,12 +327,11 @@ class TestPassState:
         state = PassState(name="NilPass", next_state="NextState")
         state.set_path_processor(mock_path_processor)
 
-        output, next_state =  await state.execute(None)
+        output, next_state = await state.execute(None)
 
         mock_path_processor.apply_input_path.assert_called_once_with(None, None)
         assert output == "final_output"
         assert next_state == "NextState"
-
 
     @pytest.mark.asyncio
     async def test_pass_state_execute_uses_default_processor(self, sample_input_data):
@@ -414,10 +364,7 @@ class TestPassState:
 
         result = state.to_dict()
 
-        assert result == {
-            "Type": "Pass",
-            "Next": "NextState"
-        }
+        assert result == {"Type": "Pass", "Next": "NextState"}
 
     def test_pass_state_to_dict_with_end(self):
         """Test to_dict with end state."""
@@ -425,44 +372,25 @@ class TestPassState:
 
         result = state.to_dict()
 
-        assert result == {
-            "Type": "Pass",
-            "End": True
-        }
+        assert result == {"Type": "Pass", "End": True}
 
     def test_pass_state_to_dict_with_result(self):
         """Test to_dict with result."""
         result_data = {"status": "success", "value": 100}
-        state = PassState(
-            name="ResultPass",
-            next_state="NextState",
-            result=result_data
-        )
+        state = PassState(name="ResultPass", next_state="NextState", result=result_data)
 
         result = state.to_dict()
 
-        assert result == {
-            "Type": "Pass",
-            "Next": "NextState",
-            "Result": result_data
-        }
+        assert result == {"Type": "Pass", "Next": "NextState", "Result": result_data}
 
     def test_pass_state_to_dict_with_parameters(self):
         """Test to_dict with parameters."""
         params = {"key.$": "$.data", "static": "value"}
-        state = PassState(
-            name="ParamsPass",
-            next_state="NextState",
-            parameters=params
-        )
+        state = PassState(name="ParamsPass", next_state="NextState", parameters=params)
 
         result = state.to_dict()
 
-        assert result == {
-            "Type": "Pass",
-            "Next": "NextState",
-            "Parameters": params
-        }
+        assert result == {"Type": "Pass", "Next": "NextState", "Parameters": params}
 
     def test_pass_state_to_dict_complete(self):
         """Test to_dict with all allowed fields."""
@@ -473,7 +401,7 @@ class TestPassState:
             result_path="$.result",
             output_path="$.output",
             result={"key": "value"},
-            comment="Complete pass state"
+            comment="Complete pass state",
         )
 
         result = state.to_dict()
@@ -485,27 +413,19 @@ class TestPassState:
             "ResultPath": "$.result",
             "OutputPath": "$.output",
             "Result": {"key": "value"},
-            "Comment": "Complete pass state"
+            "Comment": "Complete pass state",
         }
 
     # Test to_json method
 
     def test_pass_state_to_json(self):
         """Test to_json method."""
-        state = PassState(
-            name="JsonPass",
-            next_state="NextState",
-            result={"status": "ok"}
-        )
+        state = PassState(name="JsonPass", next_state="NextState", result={"status": "ok"})
 
         json_str = state.to_json()
         result = json.loads(json_str)
 
-        assert result == {
-            "Type": "Pass",
-            "Next": "NextState",
-            "Result": {"status": "ok"}
-        }
+        assert result == {"Type": "Pass", "Next": "NextState", "Result": {"status": "ok"}}
 
     def test_pass_state_to_json_indented(self):
         """Test to_json with indentation."""
@@ -542,12 +462,7 @@ class TestPassState:
 
     def test_pass_state_repr(self):
         """Test detailed representation."""
-        state = PassState(
-            name="TestPass",
-            next_state="NextState",
-            end=False,
-            result={"key": "value"}
-        )
+        state = PassState(name="TestPass", next_state="NextState", end=False, result={"key": "value"})
 
         repr_str = repr(state)
         assert "PassState" in repr_str
@@ -563,11 +478,10 @@ class TestPassState:
         state.set_path_processor(mock_path_processor)
 
         empty_input = {}
-        output, next_state =  await state.execute(empty_input)
+        output, next_state = await state.execute(empty_input)
 
         assert output == "final_output"
         assert next_state == "NextState"
-
 
     @pytest.mark.asyncio
     async def test_pass_state_execute_different_input_types(self, mock_path_processor):
@@ -588,7 +502,7 @@ class TestPassState:
         for input_data, description in test_cases:
             mock_path_processor.reset_mock()
 
-            output, next_state =  await state.execute(input_data)
+            output, next_state = await state.execute(input_data)
 
             assert output == "final_output", f"Failed for {description}"
             assert next_state == "NextState", f"Failed for {description}"
@@ -604,16 +518,12 @@ class TestPassState:
         state = PassState(name="IntegrationPass", next_state="NextState")
         state.set_path_processor(processor)
 
-        input_data = {
-            "user": {"name": "John", "age": 30},
-            "metadata": {"source": "test"}
-        }
+        input_data = {"user": {"name": "John", "age": 30}, "metadata": {"source": "test"}}
 
-        output, next_state =  await state.execute(input_data)
+        output, next_state = await state.execute(input_data)
 
         assert output == input_data
         assert next_state == "NextState"
-
 
     @pytest.mark.asyncio
     async def test_pass_state_integration_with_result(self):
@@ -622,23 +532,17 @@ class TestPassState:
 
         processor = JSONPathProcessor()
         result_data = {"injected": "value", "count": 42}
-        state = PassState(
-            name="ResultIntegration",
-            next_state="NextState",
-            result=result_data,
-            result_path="$.result"
-        )
+        state = PassState(name="ResultIntegration", next_state="NextState", result=result_data, result_path="$.result")
         state.set_path_processor(processor)
 
         input_data = {"original": "data"}
 
-        output, next_state =  await state.execute(input_data)
+        output, next_state = await state.execute(input_data)
 
         # Result should be injected at result_path
         assert "result" in output
         assert output["result"] == result_data
         assert next_state == "NextState"
-
 
     # Test inheritance
 

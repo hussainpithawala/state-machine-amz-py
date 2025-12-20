@@ -13,8 +13,7 @@ from src.execution import Execution
 from src.machine.state_machine import StateMachine
 
 
-class TestStateMachine():
-
+class TestStateMachine:
     @pytest.mark.asyncio
     async def test_new_valid_definition(self):
         """Test creating state machine from valid JSON definition."""

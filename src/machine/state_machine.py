@@ -35,9 +35,7 @@ class StateMachine:
     version: str = "1.0"
 
     # Internal fields
-    _validator: Optional[StateMachineValidator] = field(
-        default=None, init=False, repr=False
-    )
+    _validator: Optional[StateMachineValidator] = field(default=None, init=False, repr=False)
     _created_at: datetime = field(default_factory=datetime.now, init=False, repr=False)
 
     def __post_init__(self) -> None:
@@ -105,10 +103,7 @@ class StateMachine:
 
         # Validate that States exists
         if "States" not in data or not data["States"]:
-            raise ValueError(
-                "Failed to unmarshal state machine definition: "
-                "States is required and cannot be empty"
-            )
+            raise ValueError("Failed to unmarshal state machine definition: " "States is required and cannot be empty")
 
         # Parse states using factory
         state_factory = StateFactory()
@@ -199,9 +194,7 @@ class StateMachine:
 
         return await self.run_execution(exec_ctx, context)
 
-    async def run_execution(
-        self, exec_ctx: Execution, context: Optional[Dict[str, Any]] = None
-    ) -> Execution:
+    async def run_execution(self, exec_ctx: Execution, context: Optional[Dict[str, Any]] = None) -> Execution:
         """
         Run an execution with the given context.
 
@@ -225,9 +218,7 @@ class StateMachine:
                 if elapsed > self.timeout_seconds:
                     exec_ctx.status = "TIMED_OUT"
                     exec_ctx.end_time = datetime.now()
-                    exec_ctx.error = TimeoutError(
-                        f"State machine timed out after {self.timeout_seconds} seconds"
-                    )
+                    exec_ctx.error = TimeoutError(f"State machine timed out after {self.timeout_seconds} seconds")
                     return exec_ctx
 
             # Get current state

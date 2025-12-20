@@ -93,7 +93,6 @@ class TestJSONPathProcessor:
             processor.get_value(sample_data, "$.input.items[10]")
         assert "array index 10 out of bounds" in str(exec.value)
 
-
     def test_get_value_invalid_array_index(self, processor, sample_data):
         """Test getting value with invalid array index."""
         with pytest.raises(ValueError, match=r"invalid array index: \[not-a-number\]"):
@@ -239,9 +238,7 @@ class TestJSONPathProcessor:
 
     def test_apply_result_path_valid_path(self, processor):
         """Test apply_result_path with valid path."""
-        result = processor.apply_result_path(
-            {"original": "data"}, "new_result", "$.result"
-        )
+        result = processor.apply_result_path({"original": "data"}, "new_result", "$.result")
         # Creates nested structure
         assert isinstance(result, dict)
         assert "original" in result
@@ -343,18 +340,14 @@ class TestJSONPathProcessor:
 
     def test_expand_value_dict(self, processor, sample_data):
         """Test expand_value with dictionary."""
-        value = processor.expand_value(
-            {"name": "$.input.user.name", "age": 30}, sample_data
-        )
+        value = processor.expand_value({"name": "$.input.user.name", "age": 30}, sample_data)
 
         assert value["name"] == "John"
         assert value["age"] == 30
 
     def test_expand_value_array(self, processor, sample_data):
         """Test expand_value with array."""
-        value = processor.expand_value(
-            ["$.input.items[0]", "$.input.items[1]", "end"], sample_data
-        )
+        value = processor.expand_value(["$.input.items[0]", "$.input.items[1]", "end"], sample_data)
         assert value == ["apple", "banana", "end"]
 
     def test_expand_value_other_types(self, processor, sample_data):
@@ -414,17 +407,13 @@ class TestJSONPathProcessor:
         parts = processor.split_path("user.name")
         assert parts == ["user", "name"]
 
-    @pytest.mark.skip(
-        reason="test_split_path_with_array is currently under development"
-    )
+    @pytest.mark.skip(reason="test_split_path_with_array is currently under development")
     def test_split_path_with_array(self, processor):
         """Test _split_path with array index."""
         parts = processor.split_path("users[0].name")
         assert parts == ["users[0]", "name"]
 
-    @pytest.mark.skip(
-        reason="test_split_path_nested_array is currently under development"
-    )
+    @pytest.mark.skip(reason="test_split_path_nested_array is currently under development")
     def test_split_path_nested_array(self, processor):
         """Test _split_path with nested array."""
         parts = processor.split_path("matrix[1][2]")
@@ -476,7 +465,7 @@ class TestJSONPathProcessor:
     def test_set_public_method(self, processor):
         """Test public Set method."""
         data = {"existing": "value"}
-        result= processor.set(data, "$.new", "value")
+        result = processor.set(data, "$.new", "value")
         assert result["existing"] == "value"
         assert result["new"] == "value"
 
@@ -503,9 +492,7 @@ class TestJSONPathProcessor:
 
     def test_apply_result_path_safe(self, processor):
         """Test apply_result_path_safe."""
-        result = processor.apply_result_path_safe(
-            {"input": "data"}, "result", "$.output"
-        )
+        result = processor.apply_result_path_safe({"input": "data"}, "result", "$.output")
         assert isinstance(result, dict)
 
     def test_apply_output_path_safe(self, processor, sample_data):

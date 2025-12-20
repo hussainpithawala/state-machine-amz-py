@@ -12,7 +12,6 @@ from src.execution import Execution, StateHistory, _generate_execution_id
 
 
 class TestExecution:
-
     def test_new_context(self):
         """Test creating new execution context."""
         exec_ctx = Execution.new_context("test-exec", "StartState", {"key": "value"})

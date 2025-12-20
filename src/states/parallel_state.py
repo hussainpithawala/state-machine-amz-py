@@ -38,8 +38,7 @@ class Branch:
         result: Dict[str, Any] = {
             "StartAt": self.start_at,
             "States": {
-                name: state.to_dict() if hasattr(state, "to_dict") else state
-                for name, state in self.states.items()
+                name: state.to_dict() if hasattr(state, "to_dict") else state for name, state in self.states.items()
             },
         }
 
@@ -71,36 +70,27 @@ class ParallelState(BaseState):
         super().validate(skip_name, skip_type, skip_next_state)
 
         if not self.branches:
-            raise ValueError(
-                f"Parallel state '{self.type}' must have at least one branch"
-            )
+            raise ValueError(f"Parallel state '{self.type}' must have at least one branch")
 
         # Validate each branch
         for i, branch in enumerate(self.branches):
             if not branch.start_at:
-                raise ValueError(
-                    f"Parallel state '{self.type}' branch {i}: StartAt is required"
-                )
+                raise ValueError(f"Parallel state '{self.type}' branch {i}: StartAt is required")
 
             if not branch.states:
-                raise ValueError(
-                    f"Parallel state '{self.type}' branch {i}: States must not be empty"
-                )
+                raise ValueError(f"Parallel state '{self.type}' branch {i}: States must not be empty")
 
             # Validate that StartAt state exists
             if branch.start_at not in branch.states:
                 raise ValueError(
-                    f"Parallel state '{self.type}' branch {i}: "
-                    f"StartAt state '{branch.start_at}' not found"
+                    f"Parallel state '{self.type}' branch {i}: " f"StartAt state '{branch.start_at}' not found"
                 )
 
             # Validate that all states in branch have proper End or Next configuration
             for state_name, state in branch.states.items():
                 state.validate()
 
-    async def execute(
-        self, input_data: Any, context: Optional[Dict[str, Any]] = None
-    ) -> tuple[Any, Optional[str]]:
+    async def execute(self, input_data: Any, context: Optional[Dict[str, Any]] = None) -> tuple[Any, Optional[str]]:
         """Execute the parallel state by running all branches concurrently."""
         if context is None:
             context = {}
@@ -114,10 +104,7 @@ class ParallelState(BaseState):
             processed_input = processor.apply_input_path(input_data, self.input_path)
 
             # Execute all branches concurrently
-            tasks = [
-                self._execute_branch(branch, processed_input, context)
-                for branch in self.branches
-            ]
+            tasks = [self._execute_branch(branch, processed_input, context) for branch in self.branches]
 
             # Wait for all branches to complete
             results = await asyncio.gather(*tasks)
@@ -130,9 +117,7 @@ class ParallelState(BaseState):
                 output = processor.expand_value(self.result_selector, {"$": results})
 
             # Apply result path
-            output = processor.apply_result_path(
-                processed_input, output, self.result_path
-            )
+            output = processor.apply_result_path(processed_input, output, self.result_path)
 
             # Apply output path
             output = processor.apply_output_path(output, self.output_path)
@@ -147,9 +132,7 @@ class ParallelState(BaseState):
                 "States.Runtime",
             )
 
-    async def _execute_branch(
-        self, branch: Branch, input_data: Any, context: Dict[str, Any]
-    ) -> Any:
+    async def _execute_branch(self, branch: Branch, input_data: Any, context: Dict[str, Any]) -> Any:
         """
         Execute a single branch as a mini state machine.
 
@@ -169,9 +152,7 @@ class ParallelState(BaseState):
             try:
                 state = branch.states[current_state_name]
             except KeyError:
-                raise StateError(
-                    f'State "{current_state_name}" not found in branch States.Runtime'
-                )
+                raise StateError(f'State "{current_state_name}" not found in branch States.Runtime')
 
             # Execute the state
             output, next_state = await state.execute(current_input, context)
@@ -208,9 +189,7 @@ class ParallelState(BaseState):
         return result
 
     @classmethod
-    def from_dict(
-        cls, name: str, state_dict: Dict[str, Any], state_factory=None
-    ) -> ParallelState:
+    def from_dict(cls, name: str, state_dict: Dict[str, Any], state_factory=None) -> ParallelState:
         """
         Create ParallelState from dictionary.
 
@@ -278,9 +257,7 @@ class ParallelState(BaseState):
         return Branch(start_at=start_at, states=states, comment=comment)
 
 
-def create_branch(
-    start_at: str, states: Dict[str, Any], comment: Optional[str] = None
-) -> Branch:
+def create_branch(start_at: str, states: Dict[str, Any], comment: Optional[str] = None) -> Branch:
     """
     Helper function to create a Branch.
 

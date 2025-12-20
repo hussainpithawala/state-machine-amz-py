@@ -13,7 +13,7 @@ from src.repository.sqlalchemy_postgres import SQLAlchemyPostgresRepository
 from src.repository.types import ExecutionFilter, ExecutionRecord, RepositoryConfig, StateHistoryRecord
 
 
-class TestSQLAlchemyPostgresIntegration():
+class TestSQLAlchemyPostgresIntegration:
     """Integration tests for SQLAlchemy PostgreSQL repository."""
 
     repository: Optional[SQLAlchemyPostgresRepository] = None
@@ -238,15 +238,11 @@ class TestSQLAlchemyPostgresIntegration():
         assert len(executions) >= 5
 
         # Filter by status
-        executions = self.repository.list_executions(
-            ExecutionFilter(limit=100, offset=0, status="SUCCEEDED")
-        )
+        executions = self.repository.list_executions(ExecutionFilter(limit=100, offset=0, status="SUCCEEDED"))
         assert 3 == len(executions)
 
         # Filter by state machine ID
-        executions = self.repository.list_executions(
-            ExecutionFilter(state_machine_id="sm-order", limit=100, offset=0)
-        )
+        executions = self.repository.list_executions(ExecutionFilter(state_machine_id="sm-order", limit=100, offset=0))
         assert 3 == len(executions)
 
         # Combined filters
@@ -261,9 +257,7 @@ class TestSQLAlchemyPostgresIntegration():
 
         # Time range filter
         time_lapse = base_time + timedelta(minutes=15)
-        executions = self.repository.list_executions(
-            ExecutionFilter(limit=100, offset=0, start_after=time_lapse)
-        )
+        executions = self.repository.list_executions(ExecutionFilter(limit=100, offset=0, start_after=time_lapse))
         assert 3 == len(executions)
 
     def test_delete_execution(self):

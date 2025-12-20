@@ -105,9 +105,7 @@ class JSONPathProcessor(PathProcessor):
             return input_data
         return self.get_value(input_data, path)
 
-    def apply_result_path(
-        self, input_data: Any, result: Any, path: Optional[str]
-    ) -> Any:
+    def apply_result_path(self, input_data: Any, result: Any, path: Optional[str]) -> Any:
         """
         Apply result path to combine input and result.
 
@@ -320,9 +318,7 @@ class JSONPathProcessor(PathProcessor):
 
         return result
 
-    def expand_parameters(
-        self, params: Dict[str, Any], input_data: Any
-    ) -> Dict[str, Any]:
+    def expand_parameters(self, params: Dict[str, Any], input_data: Any) -> Dict[str, Any]:
         """
         Expand parameters with JSONPath references.
 
@@ -386,18 +382,10 @@ class JSONPathProcessor(PathProcessor):
 
         for key, value in b.items():
             try:
-                if (
-                    key in result
-                    and isinstance(result[key], dict)
-                    and isinstance(value, dict)
-                ):
+                if key in result and isinstance(result[key], dict) and isinstance(value, dict):
                     # Both are maps, merge recursively
                     result[key] = self._merge_maps(result[key], value)
-                elif (
-                    key in result
-                    and isinstance(result[key], list)
-                    and isinstance(value, list)
-                ):
+                elif key in result and isinstance(result[key], list) and isinstance(value, list):
                     # Not both maps or different types, b wins
                     for index, current_val in enumerate(result[key]):
                         if (index <= len(value) - 1) and value[index]:
@@ -444,9 +432,7 @@ class JSONPathProcessor(PathProcessor):
 
         return self.get_value(input_data, path)
 
-    def apply_result_path_safe(
-        self, input_data: Any, result: Any, path: Optional[str]
-    ) -> Any:
+    def apply_result_path_safe(self, input_data: Any, result: Any, path: Optional[str]) -> Any:
         """
         Safe version that raises exceptions on error.
 

@@ -28,9 +28,7 @@ class StateMachineInterface(Protocol):
         """Check if execution has timed out."""
         ...
 
-    async def run_execution(
-        self, exec_ctx: Execution, context: Optional[Dict[str, Any]] = None
-    ) -> Execution:
+    async def run_execution(self, exec_ctx: Execution, context: Optional[Dict[str, Any]] = None) -> Execution:
         """Run execution."""
         ...
 

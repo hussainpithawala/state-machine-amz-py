@@ -98,7 +98,7 @@ class FakeRepository(Repository):
         return 1
 
 
-class TestPersistenceManager():
+class TestPersistenceManager:
     """Test cases for PersistenceManager."""
 
     def test_unsupported_strategy(self):
@@ -108,11 +108,14 @@ class TestPersistenceManager():
             PersistenceManager(config)
         assert ce.value.args[0] == "unsupported persistence repository: nope"
 
-    @pytest.mark.parametrize("strategy, msg", [
-        ("dynamodb", "DynamoDB repository not yet implemented"),
-        ("redis", "Redis repository not yet implemented"),
-        ("memory", "InMemory repository not yet implemented"),
-    ])
+    @pytest.mark.parametrize(
+        "strategy, msg",
+        [
+            ("dynamodb", "DynamoDB repository not yet implemented"),
+            ("redis", "Redis repository not yet implemented"),
+            ("memory", "InMemory repository not yet implemented"),
+        ],
+    )
     def test_not_implemented_strategies(self, strategy, msg):
         """Test that not-yet-implemented strategies raise NotImplementedError."""
         config = RepositoryConfig(strategy=strategy, connection_url="fake")
@@ -216,7 +219,7 @@ class TestPersistenceManager():
             name="test",
             status=ExecutionStatus.RUNNING,
             start_time=exec_start,
-            current_state="A"
+            current_state="A",
         )
 
         hist_start = datetime(2025, 3, 4, 5, 6, 8)
@@ -234,7 +237,7 @@ class TestPersistenceManager():
             end_time=hist_end,
             retry_count=2,
             sequence_number=7,
-            error=Exception("state failed")
+            error=Exception("state failed"),
         )
 
         pm.save_state_history(exec, h)

@@ -28,7 +28,7 @@ class TaskContext:
         return self.handlers.get(resource)
 
 
-class TestPersistentStateMachine():
+class TestPersistentStateMachine:
     persistenceManager: Optional[PersistenceManager] = None
 
     def setup_class(cls):
@@ -89,9 +89,9 @@ class TestPersistentStateMachine():
                 }
             }
         }"""
-        psm = PersistentStateMachine.create_from_json(json_str=definition,
-                                                      persistence_manager=self.persistenceManager,
-                                                      state_machine_id="test-sm-1")
+        psm = PersistentStateMachine.create_from_json(
+            json_str=definition, persistence_manager=self.persistenceManager, state_machine_id="test-sm-1"
+        )
 
         input_data = {"key": "value"}
 
@@ -128,8 +128,9 @@ class TestPersistentStateMachine():
                 }
             }"""
 
-        sm = PersistentStateMachine.create_from_json(definition, persistence_manager=self.persistenceManager,
-                                                     state_machine_id="test-sm-2")
+        sm = PersistentStateMachine.create_from_json(
+            definition, persistence_manager=self.persistenceManager, state_machine_id="test-sm-2"
+        )
         input_data = "initial"
 
         exec_ctx = await sm.execute(input_data)
@@ -158,8 +159,9 @@ class TestPersistentStateMachine():
                 }
             }"""
 
-        sm = PersistentStateMachine.create_from_json(definition, persistence_manager=self.persistenceManager,
-                                                     state_machine_id="test-sm-3")
+        sm = PersistentStateMachine.create_from_json(
+            definition, persistence_manager=self.persistenceManager, state_machine_id="test-sm-3"
+        )
         input_data = "test"
 
         exec_ctx = await sm.execute(input_data)
@@ -180,10 +182,11 @@ class TestPersistentStateMachine():
         task_context = TaskContext()
 
         # Register greeting handler
-        async def test_greet_handler(resource: str,
-                                     input_data: Any,
-                                     parameters: Optional[Dict[str, Any]] = None,
-                                     ):
+        async def test_greet_handler(
+            resource: str,
+            input_data: Any,
+            parameters: Optional[Dict[str, Any]] = None,
+        ):
             print("Test Greeting handler called")
             if isinstance(input_data, dict):
                 input_data["greeting"] = f"Hello, {input_data.get('name', 'World')}!"
@@ -207,16 +210,20 @@ class TestPersistentStateMachine():
         }
         """
 
-        psm = PersistentStateMachine.create_from_json(definition, persistence_manager=self.persistenceManager,
-                                                      state_machine_id="test-sm-4")
+        psm = PersistentStateMachine.create_from_json(
+            definition, persistence_manager=self.persistenceManager, state_machine_id="test-sm-4"
+        )
         input_data = "test"
 
         # Create context
         task_exec_context = with_execution_context({}, task_context)
 
-        exec_ctx = await psm.execute(input_data, task_exec_context=task_exec_context,
-                                     execution_name="GreetUser-exec-name-1",
-                                     execution_id="GreetUser-exec-id-1")
+        exec_ctx = await psm.execute(
+            input_data,
+            task_exec_context=task_exec_context,
+            execution_name="GreetUser-exec-name-1",
+            execution_id="GreetUser-exec-id-1",
+        )
 
         assert exec_ctx is not None
 

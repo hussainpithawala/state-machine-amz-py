@@ -145,9 +145,7 @@ class PersistentStateMachine(StateMachine):
             raise ValueError("Cannot prepare a persistent-state-machine without an Id")
 
         if persistence_manager is None:
-            raise ValueError(
-                "Cannot prepare a persistent-state-machine without a persistent manager"
-            )
+            raise ValueError("Cannot prepare a persistent-state-machine without a persistent manager")
 
         psm = PersistentStateMachine.from_json(definition=yaml_str)
         psm._set_state_machine_id(state_machine_id=state_machine_id)
@@ -210,9 +208,7 @@ class PersistentStateMachine(StateMachine):
     def _set_state_machine_id(self, state_machine_id: str):
         self.state_machine_id = state_machine_id or f"sm-{int(time.time())}"
 
-    async def _run_execution(
-        self, exec_ctx: PersistentContext, task_exec_ctx: Dict[str, Any]
-    ) -> PersistentContext:
+    async def _run_execution(self, exec_ctx: PersistentContext, task_exec_ctx: Dict[str, Any]) -> PersistentContext:
         """Run the execution with persistence hooks.
 
         Args:
@@ -245,9 +241,7 @@ class PersistentStateMachine(StateMachine):
 
             # Execute the state
             try:
-                output, next_state = await state.execute(
-                    exec_ctx.input, context=task_exec_ctx
-                )
+                output, next_state = await state.execute(exec_ctx.input, context=task_exec_ctx)
 
                 # Update history
                 history.end_time = datetime.utcnow()
@@ -274,9 +268,7 @@ class PersistentStateMachine(StateMachine):
 
                 # Move to next state
                 if not next_state:
-                    error = Exception(
-                        f"non-terminal state {current_state_name} did not provide next state"
-                    )
+                    error = Exception(f"non-terminal state {current_state_name} did not provide next state")
                     exec_ctx.mark_failed(error)
                     await self._persist_execution(exec_ctx)
                     raise error
@@ -326,9 +318,7 @@ class PersistentStateMachine(StateMachine):
         except Exception as e:
             print(f"Warning: failed to persist execution state: {e}")
 
-    async def _save_state_history(
-        self, exec_ctx: PersistentContext, history: StateHistoryEntry
-    ) -> None:
+    async def _save_state_history(self, exec_ctx: PersistentContext, history: StateHistoryEntry) -> None:
         """Save state history to repository.
 
         Args:
@@ -351,9 +341,7 @@ class PersistentStateMachine(StateMachine):
             )
 
             hist = StateHistory(
-                id=generate_history_id(
-                    exec_ctx.id, history.state_name, history.start_time
-                ),
+                id=generate_history_id(exec_ctx.id, history.state_name, history.start_time),
                 execution_id=exec_ctx.id,
                 state_name=history.state_name,
                 state_type=history.state_type,
@@ -382,9 +370,7 @@ class PersistentStateMachine(StateMachine):
         """
         return self.persistence_manager.get_execution(execution_id)
 
-    async def get_execution_history(
-        self, execution_id: str
-    ) -> List[StateHistoryRecord]:
+    async def get_execution_history(self, execution_id: str) -> List[StateHistoryRecord]:
         """Retrieve execution history from repository.
 
         Args:
@@ -395,9 +381,7 @@ class PersistentStateMachine(StateMachine):
         """
         return self.persistence_manager.get_state_history(execution_id)
 
-    def list_executions(
-        self, filter: Optional[ExecutionFilter] = None
-    ) -> List[ExecutionRecord]:
+    def list_executions(self, filter: Optional[ExecutionFilter] = None) -> List[ExecutionRecord]:
         """List executions from repository.
 
         Args:

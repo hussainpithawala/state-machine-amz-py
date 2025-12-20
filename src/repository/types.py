@@ -303,9 +303,7 @@ class ExtendedRepository(Repository):
     """Extended repository interface with additional capabilities."""
 
     @abstractmethod
-    def get_execution_with_history(
-        self, execution_id: str
-    ) -> tuple[ExecutionRecord, List[StateHistoryRecord]]:
+    def get_execution_with_history(self, execution_id: str) -> tuple[ExecutionRecord, List[StateHistoryRecord]]:
         """Retrieves an execution with its full state history."""
         pass
 
@@ -336,9 +334,7 @@ def generate_execution_id() -> str:
     return f"exec-{random_bytes}"
 
 
-def generate_state_history_id(
-    execution_id: str, state_name: str, sequence_number: int
-) -> str:
+def generate_state_history_id(execution_id: str, state_name: str, sequence_number: int) -> str:
     """Generates a unique state history ID."""
     random_bytes = secrets.token_hex(4)
     return f"{execution_id}-{state_name}-{sequence_number}-{random_bytes}"
@@ -350,9 +346,7 @@ def generate_history_id(execution_id: str, state_name: str, timestamp: datetime)
     return f"{execution_id}-{state_name}-{timestamp_ns}"
 
 
-def new_execution(
-    state_machine_id: str, name: str, input_data: Optional[Dict[str, Any]] = None
-) -> Execution:
+def new_execution(state_machine_id: str, name: str, input_data: Optional[Dict[str, Any]] = None) -> Execution:
     """Creates a new execution with default values."""
     return Execution(
         id=generate_execution_id(),

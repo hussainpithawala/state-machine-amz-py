@@ -76,7 +76,7 @@ async def test_task_state_execute_with_input_path():
         resource=_resource_key,
         end=True,
         input_path="$.data",
-        task_handler=MockTaskHandler(execute_func=execute_func)
+        task_handler=MockTaskHandler(execute_func=execute_func),
     )
 
     input_data = {"data": {"value": "test"}, "other": "ignored"}
@@ -253,7 +253,7 @@ async def test_task_state_execute_with_catch():
             )
         ],
         task_handler=handler,
-        end=True
+        end=True,
     )
 
     input_data = {"original": "data"}
@@ -296,11 +296,7 @@ def test_task_state_validate():
 
     # Valid task state
     try:
-        TaskState(
-            name="TaskState",
-            resource="arn:aws:lambda:us-east-1:123456789012:function:MyFunction",
-            end=True
-        )
+        TaskState(name="TaskState", resource="arn:aws:lambda:us-east-1:123456789012:function:MyFunction", end=True)
     except ValueError:
         pytest.fail("ValueError should not be raised")
 
@@ -314,7 +310,7 @@ def test_task_state_validate():
             name="TaskState2",
             resource="arn:aws:lambda:us-east-1:123456789012:function:MyFunction",
             timeout_seconds=0,
-            end=True
+            end=True,
         )
 
     # Invalid heartbeat
@@ -323,19 +319,17 @@ def test_task_state_validate():
             name="TaskState",
             resource="arn:aws:lambda:us-east-1:123456789012:function:MyFunction",
             heartbeat_seconds=-1,
-            end=True
+            end=True,
         )
 
     # Heartbeat >= timeout
-    with pytest.raises(
-            ValueError, match="HeartbeatSeconds must be less than TimeoutSeconds"
-    ):
+    with pytest.raises(ValueError, match="HeartbeatSeconds must be less than TimeoutSeconds"):
         TaskState(
             name="TaskState",
             resource="arn:aws:lambda:us-east-1:123456789012:function:MyFunction",
             timeout_seconds=10,
             heartbeat_seconds=10,
-            end=True
+            end=True,
         )
 
     # Invalid retry - no error equals
@@ -344,7 +338,7 @@ def test_task_state_validate():
             name="TaskState",
             resource="arn:aws:lambda:us-east-1:123456789012:function:MyFunction",
             retry=[RetryRule(error_equals=[])],
-            end=True
+            end=True,
         )
 
     # Invalid backoff rate
@@ -373,11 +367,7 @@ def test_task_state_getters():
 
 def test_task_state_error_matching():
     """Test error matching logic."""
-    state = TaskState(
-        name="TaskState",
-        resource="arn:aws:lambda:us-east-1:123456789012:function:MyFunction",
-        end=True
-    )
+    state = TaskState(name="TaskState", resource="arn:aws:lambda:us-east-1:123456789012:function:MyFunction", end=True)
 
     # Exact match
     error = Exception("CustomError")

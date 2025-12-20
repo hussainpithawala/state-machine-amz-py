@@ -21,9 +21,7 @@ class MockExecutionContext:
     def __init__(self):
         self.handlers: Dict[str, Callable] = {}
 
-    def register_handler(
-            self, resource: str, handler: Callable[[Any], Any]
-    ) -> None:
+    def register_handler(self, resource: str, handler: Callable[[Any], Any]) -> None:
         """Register a task handler for a resource."""
         self.handlers[resource] = handler
 
@@ -99,9 +97,7 @@ async def test_task_executor_with_parameters():
 
         return input_data
 
-    mock_exec_ctx.register_handler(
-        "arn:aws:states:::payment:process", payment_processor
-    )
+    mock_exec_ctx.register_handler("arn:aws:states:::payment:process", payment_processor)
 
     # Create context
     context = with_execution_context({}, mock_exec_ctx)
@@ -123,9 +119,7 @@ async def test_task_executor_with_parameters():
     }
 
     # Execute task
-    result = await handler.execute(
-        "arn:aws:states:::payment:process", input_data, parameters, context
-    )
+    result = await handler.execute("arn:aws:states:::payment:process", input_data, parameters, context)
 
     assert result is not None
     assert result["amount"] == 100.50
@@ -147,9 +141,7 @@ async def test_task_executor_with_timeout():
         print("Slow operation completed")
         return {"status": "slow_success"}
 
-    mock_exec_ctx.register_handler(
-        "arn:aws:lambda:::slow:operation", slow_operation
-    )
+    mock_exec_ctx.register_handler("arn:aws:lambda:::slow:operation", slow_operation)
 
     # Create context
     context = with_execution_context({}, mock_exec_ctx)
@@ -162,9 +154,7 @@ async def test_task_executor_with_timeout():
     start = time.time()
 
     with pytest.raises(Exception) as exc_info:
-        await handler.execute_with_timeout(
-            "arn:aws:lambda:::slow:operation", None, None, timeout, context
-        )
+        await handler.execute_with_timeout("arn:aws:lambda:::slow:operation", None, None, timeout, context)
 
     elapsed = time.time() - start
 
@@ -189,9 +179,7 @@ async def test_task_executor_fallback():
     input_data = {"test": "data"}
 
     # Execute - should fall back to returning input as-is
-    result = await handler.execute(
-        "arn:aws:lambda:::unknown:function", input_data, None, context
-    )
+    result = await handler.execute("arn:aws:lambda:::unknown:function", input_data, None, context)
 
     assert result == input_data
 
@@ -208,9 +196,7 @@ async def test_task_executor_error_handling():
             raise StateError("Task execution failed", error_type="States.TaskFailed")
         return {"status": "success"}
 
-    mock_exec_ctx.register_handler(
-        "arn:aws:lambda:::error:generator", error_generator
-    )
+    mock_exec_ctx.register_handler("arn:aws:lambda:::error:generator", error_generator)
 
     # Create context
     context = with_execution_context({}, mock_exec_ctx)
@@ -222,18 +208,14 @@ async def test_task_executor_error_handling():
     input_data = {"should_fail": True}
 
     with pytest.raises(Exception) as exc_info:
-        await handler.execute(
-            "arn:aws:lambda:::error:generator", input_data, None, context
-        )
+        await handler.execute("arn:aws:lambda:::error:generator", input_data, None, context)
 
     assert "Task execution failed" in str(exc_info.value)
 
     # Test success case
     input_data = {"should_fail": False}
 
-    result = await handler.execute(
-        "arn:aws:lambda:::error:generator", input_data, None, context
-    )
+    result = await handler.execute("arn:aws:lambda:::error:generator", input_data, None, context)
 
     assert result["status"] == "success"
 
@@ -248,9 +230,7 @@ async def test_task_executor_no_execution_context():
     input_data = {"test": "data"}
 
     # Execute without execution context - should fall back
-    result = await handler.execute(
-        "arn:aws:lambda:::any:function", input_data, None, {}
-    )
+    result = await handler.execute("arn:aws:lambda:::any:function", input_data, None, {})
 
     assert result == input_data
 
@@ -264,15 +244,23 @@ async def test_task_state_integration():
     # Prepare handler as a sub-class of AbstractTaskHandler
 
     class TransformDataHandler(AbstractTaskHandler):
-
-        async def execute(self, resource: str, input_data: Any, parameters: Optional[Dict[str, Any]] = None,
-                          context: Optional[Dict[str, Any]] = None) -> Any:
+        async def execute(
+            self,
+            resource: str,
+            input_data: Any,
+            parameters: Optional[Dict[str, Any]] = None,
+            context: Optional[Dict[str, Any]] = None,
+        ) -> Any:
             return self.transform_data(input_data)
 
-        async def execute_with_timeout(self, resource: str, input_data: Any,
-                                       parameters: Optional[Dict[str, Any]] = None,
-                                       timeout_seconds: Optional[int] = None,
-                                       context: Optional[Dict[str, Any]] = None) -> Any:
+        async def execute_with_timeout(
+            self,
+            resource: str,
+            input_data: Any,
+            parameters: Optional[Dict[str, Any]] = None,
+            timeout_seconds: Optional[int] = None,
+            context: Optional[Dict[str, Any]] = None,
+        ) -> Any:
             return self.transform_data(input_data)
 
         def transform_data(self, input_data):
@@ -285,9 +273,7 @@ async def test_task_state_integration():
 
     # Register handler
 
-    mock_exec_ctx.register_handler(
-        "arn:aws:lambda:function:TransformData", TransformDataHandler()
-    )
+    mock_exec_ctx.register_handler("arn:aws:lambda:function:TransformData", TransformDataHandler())
 
     # Create task state
     task_state = TaskState(
@@ -325,15 +311,23 @@ async def test_task_retry_logic():
     call_count = {"count": 0}
 
     class FlakyServiceHandler(AbstractTaskHandler):
-
-        async def execute(self, resource: str, input_data: Any, parameters: Optional[Dict[str, Any]] = None,
-                          context: Optional[Dict[str, Any]] = None) -> Any:
+        async def execute(
+            self,
+            resource: str,
+            input_data: Any,
+            parameters: Optional[Dict[str, Any]] = None,
+            context: Optional[Dict[str, Any]] = None,
+        ) -> Any:
             return self.__flaky_service__(input_data)
 
-        async def execute_with_timeout(self, resource: str, input_data: Any,
-                                       parameters: Optional[Dict[str, Any]] = None,
-                                       timeout_seconds: Optional[int] = None,
-                                       context: Optional[Dict[str, Any]] = None) -> Any:
+        async def execute_with_timeout(
+            self,
+            resource: str,
+            input_data: Any,
+            parameters: Optional[Dict[str, Any]] = None,
+            timeout_seconds: Optional[int] = None,
+            context: Optional[Dict[str, Any]] = None,
+        ) -> Any:
             return self.__flaky_service__(input_data)
 
         def __flaky_service__(self, input_data):
@@ -349,9 +343,7 @@ async def test_task_retry_logic():
                 "finalized": True,
             }
 
-    mock_exec_ctx.register_handler(
-        "arn:aws:lambda:function:FlakyService", FlakyServiceHandler()
-    )
+    mock_exec_ctx.register_handler("arn:aws:lambda:function:FlakyService", FlakyServiceHandler())
 
     # Create task state with retry policy
     task_state = TaskState(
@@ -366,7 +358,7 @@ async def test_task_retry_logic():
             )
         ],
         catch=[CatchRule(error_equals=["States.TaskFailed"], next_state="HandleFailure")],
-        end=True
+        end=True,
     )
 
     # Create context
@@ -401,9 +393,13 @@ async def test_task_catch_logic():
     call_count = {"count": 0}
 
     class AlwaysFailsHandler(DefaultTaskHandler):
-
-        async def execute(self, resource: str, input_data: Any, parameters: Optional[Dict[str, Any]] = None,
-                          context: Optional[Dict[str, Any]] = None) -> Any:
+        async def execute(
+            self,
+            resource: str,
+            input_data: Any,
+            parameters: Optional[Dict[str, Any]] = None,
+            context: Optional[Dict[str, Any]] = None,
+        ) -> Any:
             return self.always_fails(input_data)
 
         def can_handle(self, resource: str) -> bool:
@@ -413,9 +409,7 @@ async def test_task_catch_logic():
             call_count["count"] += 1
             raise StateError("Task failed", error_type="States.TaskFailed")
 
-    mock_exec_ctx.register_handler(
-        "arn:aws:lambda:function:AlwaysFails", AlwaysFailsHandler()
-    )
+    mock_exec_ctx.register_handler("arn:aws:lambda:function:AlwaysFails", AlwaysFailsHandler())
 
     # Create task state with catch policy
     task_state = TaskState(
@@ -429,7 +423,7 @@ async def test_task_catch_logic():
                 next_state="ErrorHandler",
             )
         ],
-        end=True
+        end=True,
     )
 
     # Create context
@@ -470,9 +464,7 @@ async def test_example_task_executor():
         payment["transaction_id"] = f"TXN-{int(time.time() * 1000000)}"
         return payment
 
-    mock_exec_ctx.register_handler(
-        "arn:aws:states:::payment:process", process_payment
-    )
+    mock_exec_ctx.register_handler("arn:aws:states:::payment:process", process_payment)
 
     # Register email sender
     async def send_email(input_data):
@@ -497,9 +489,7 @@ async def test_example_task_executor():
         "customer": "john@example.com",
     }
 
-    result = await handler.execute(
-        "arn:aws:states:::payment:process", payment_input, None, context
-    )
+    result = await handler.execute("arn:aws:states:::payment:process", payment_input, None, context)
 
     print(f"Payment result: {result}")
     assert result["status"] == "processed"
@@ -512,9 +502,7 @@ async def test_example_task_executor():
         "body": "Your payment was successful!",
     }
 
-    email_result = await handler.execute(
-        "arn:aws:states:::email:send", email_input, None, context
-    )
+    email_result = await handler.execute("arn:aws:states:::email:send", email_input, None, context)
 
     print(f"Email result: {email_result}")
     assert email_result["sent"] is True
@@ -540,9 +528,7 @@ async def test_synchronous_handler():
     handler = DefaultTaskHandler()
 
     # Execute
-    result = await handler.execute(
-        "arn:aws:lambda:::sync:function", {"test": "data"}, None, context
-    )
+    result = await handler.execute("arn:aws:lambda:::sync:function", {"test": "data"}, None, context)
 
     assert result["result"] == "sync"
     assert result["input"]["test"] == "data"

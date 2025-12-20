@@ -54,9 +54,7 @@ class FailState(BaseState):
         # Call parent validation
         self.validate()
 
-    async def execute(
-        self, input_data: Any, context: Optional[Dict[str, Any]] = None
-    ) -> Tuple[Any, Optional[str]]:
+    async def execute(self, input_data: Any, context: Optional[Dict[str, Any]] = None) -> Tuple[Any, Optional[str]]:
         """
         Execute the Fail state.
 
@@ -89,9 +87,7 @@ class FailState(BaseState):
         """
         # Fail state specific validations
         if self.type != "Fail":
-            raise ValueError(
-                f"Fail state '{self.name}' must have Type 'Fail', " f"got '{self.type}'"
-            )
+            raise ValueError(f"Fail state '{self.name}' must have Type 'Fail', " f"got '{self.type}'")
 
         # Error field is required
         if not self.error:
@@ -103,9 +99,7 @@ class FailState(BaseState):
 
         # Fail states cannot have End field
         if self.end:
-            raise ValueError(
-                f"Fail state '{self.name}' cannot have End field (it's implicit)"
-            )
+            raise ValueError(f"Fail state '{self.name}' cannot have End field (it's implicit)")
 
         # Fail states cannot have InputPath
         if self.input_path is not None:

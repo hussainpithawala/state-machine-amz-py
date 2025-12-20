@@ -20,20 +20,15 @@ async def test_parallel_state_execute_multiple_branches():
     """Test parallel state execution with multiple branches."""
     # Create two simple branches with Pass states
     state = ParallelState(
-
         next_state="NextState",
         branches=[
             Branch(
                 start_at="Pass1",
-                states={
-                    "Pass1": PassState(name="Pass1", result="branch1-result", end=True)
-                },
+                states={"Pass1": PassState(name="Pass1", result="branch1-result", end=True)},
             ),
             Branch(
                 start_at="Pass2",
-                states={
-                    "Pass2": PassState(name="Pass2", result="branch2-result", end=True)
-                },
+                states={"Pass2": PassState(name="Pass2", result="branch2-result", end=True)},
             ),
         ],
     )
@@ -56,7 +51,6 @@ async def test_parallel_state_execute_multiple_branches():
 async def test_parallel_state_execute_with_input_path():
     """Test parallel state execution with input path."""
     state = ParallelState(
-
         end=True,
         input_path="$.data",
         branches=[
@@ -81,15 +75,12 @@ async def test_parallel_state_execute_with_input_path():
 async def test_parallel_state_execute_multi_state_branch():
     """Test parallel state with branch containing multiple states."""
     state = ParallelState(
-
         end=True,
         branches=[
             Branch(
                 start_at="Pass1",
                 states={
-                    "Pass1": PassState(
-                        name="Pass1", result="step1", next_state="Pass2"
-                    ),
+                    "Pass1": PassState(name="Pass1", result="step1", next_state="Pass2"),
                     "Pass2": PassState(name="Pass2", result="final", end=True),
                 },
             )
@@ -109,7 +100,6 @@ async def test_parallel_state_execute_multi_state_branch():
 async def test_parallel_state_execute_with_result_path():
     """Test parallel state execution with result path."""
     state = ParallelState(
-
         next_state="NextState",
         result_path="$.results",
         branches=[
@@ -140,7 +130,6 @@ async def test_parallel_state_execute_with_result_path():
 async def test_parallel_state_execute_with_output_path():
     """Test parallel state execution with output path."""
     state = ParallelState(
-
         end=True,
         output_path="$[0]",
         branches=[
@@ -166,7 +155,6 @@ async def test_parallel_state_execute_with_output_path():
 async def test_parallel_state_execute_branch_error():
     """Test parallel state when one branch fails."""
     state = ParallelState(
-
         end=True,
         branches=[
             Branch(
@@ -239,24 +227,15 @@ async def test_parallel_state_concurrent_execution():
             return await super().execute(input_data, context)
 
     state = ParallelState(
-
         end=True,
         branches=[
             Branch(
                 start_at="Pass1",
-                states={
-                    "Pass1": LoggingPassState(
-                        name="Pass1", delay=0.1, result="result1", end=True
-                    )
-                },
+                states={"Pass1": LoggingPassState(name="Pass1", delay=0.1, result="result1", end=True)},
             ),
             Branch(
                 start_at="Pass2",
-                states={
-                    "Pass2": LoggingPassState(
-                        name="Pass2", delay=0.1, result="result2", end=True
-                    )
-                },
+                states={"Pass2": LoggingPassState(name="Pass2", delay=0.1, result="result2", end=True)},
             ),
         ],
     )
@@ -275,10 +254,7 @@ def test_parallel_state_validate():
 
     # Valid parallel state
     state = ParallelState(
-
-        branches=[
-            Branch(start_at="Pass1", states={"Pass1": PassState(name="Pass1", end=True)})
-        ],
+        branches=[Branch(start_at="Pass1", states={"Pass1": PassState(name="Pass1", end=True)})],
     )
     state.validate()  # Should not raise
 
@@ -330,9 +306,7 @@ def test_parallel_state_getters():
     state = ParallelState(
         end=True,
         next_state="NextState",
-        branches=[
-            Branch(start_at="Pass1", states={"Pass1": PassState(name="Pass1", end=True)})
-        ],
+        branches=[Branch(start_at="Pass1", states={"Pass1": PassState(name="Pass1", end=True)})],
     )
 
     assert state.state_type == "Parallel"
@@ -343,11 +317,8 @@ def test_parallel_state_getters():
 def test_parallel_state_get_next_states():
     """Test getting next states from parallel state."""
     state = ParallelState(
-
         next_state="NextState",
-        branches=[
-            Branch(start_at="Pass1", states={"Pass1": PassState(name="Pass1", end=True)})
-        ],
+        branches=[Branch(start_at="Pass1", states={"Pass1": PassState(name="Pass1", end=True)})],
     )
 
     next_states = state.get_next_states()
@@ -355,11 +326,8 @@ def test_parallel_state_get_next_states():
 
     # Test with end state
     state = ParallelState(
-
         end=True,
-        branches=[
-            Branch(start_at="Pass1", states={"Pass1": PassState(name="Pass1", end=True)})
-        ],
+        branches=[Branch(start_at="Pass1", states={"Pass1": PassState(name="Pass1", end=True)})],
     )
 
     next_states = state.get_next_states()
@@ -369,7 +337,6 @@ def test_parallel_state_get_next_states():
 def test_parallel_state_to_dict():
     """Test parallel state serialization to dict."""
     state = ParallelState(
-
         next_state="NextState",
         result_path="$.results",
         branches=[
@@ -411,9 +378,7 @@ def test_branch_creation():
 def test_branch_validation():
     """Test branch validation."""
     # Valid branch
-    branch = Branch(
-        start_at="Pass1", states={"Pass1": PassState(name="Pass1", end=True)}
-    )
+    branch = Branch(start_at="Pass1", states={"Pass1": PassState(name="Pass1", end=True)})
     assert branch.start_at == "Pass1"
 
     # Empty StartAt
@@ -478,7 +443,6 @@ async def test_parallel_state_error_in_branch():
     """Test that errors in branches are propagated correctly."""
 
     state = ParallelState(
-
         end=True,
         branches=[
             Branch(start_at="Error1", states={"Error1": FailState(name="Error1", error="Error1")}),
@@ -497,7 +461,6 @@ async def test_parallel_state_error_in_branch():
 async def test_parallel_state_empty_result():
     """Test parallel state with branches that return None."""
     state = ParallelState(
-
         end=True,
         branches=[
             Branch(
@@ -523,7 +486,6 @@ async def test_parallel_state_empty_result():
 async def test_parallel_state_complex_data_flow():
     """Test parallel state with complex data transformations."""
     state = ParallelState(
-
         end=True,
         input_path="$.payload",
         result_path="$.parallel_results",

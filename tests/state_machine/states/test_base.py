@@ -31,9 +31,7 @@ class MockPathProcessor:
             return {"test": "value"}
         return input_data
 
-    def apply_result_path(
-        self, input_data: Any, result: Any, path: Optional[str]
-    ) -> Any:
+    def apply_result_path(self, input_data: Any, result: Any, path: Optional[str]) -> Any:
         if path == "$.result":
             return {"original": input_data, "result": result}
         return result
@@ -73,9 +71,7 @@ class ConcreteState(BaseState):
         # parameters will work.
         super().__post_init__()
 
-    async def execute(
-        self, input_data: Any, context: Optional[Dict[str, Any]] = None
-    ) -> tuple[Any, Optional[str]]:
+    async def execute(self, input_data: Any, context: Optional[Dict[str, Any]] = None) -> tuple[Any, Optional[str]]:
         """Test execution that returns input + 1."""
         if context and context.get("fail"):
             raise StateExecutionError("Test failure")
@@ -448,11 +444,10 @@ class TestBaseState:
             next_state="NextState",
         )
 
-        output, next_state =  await state.execute(42)
+        output, next_state = await state.execute(42)
 
         assert output == 43  # input + 1
         assert next_state == "NextState"
-
 
     @pytest.mark.asyncio
     async def test_base_state_execute_with_context(self):
@@ -464,11 +459,10 @@ class TestBaseState:
         )
 
         # Test with context but no failure
-        output, next_state =  await state.execute(42, {"test": "value"})
+        output, next_state = await state.execute(42, {"test": "value"})
 
         assert output == 43
         assert next_state == "NextState"
-
 
     @pytest.mark.asyncio
     async def test_base_state_execute_failure(self):
@@ -603,9 +597,7 @@ class TestPathProcessorProtocol:
         assert result == {"key": "value"}
 
         # Test apply_result_path
-        result = processor.apply_result_path(
-            {"input": "data"}, "result_data", "$.result"
-        )
+        result = processor.apply_result_path({"input": "data"}, "result_data", "$.result")
         assert result == {"original": {"input": "data"}, "result": "result_data"}
 
         result = processor.apply_result_path({"input": "data"}, "result_data", None)

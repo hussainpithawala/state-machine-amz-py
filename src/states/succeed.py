@@ -52,9 +52,7 @@ class SucceedState(BaseState):
         # Call parent validation
         self.validate()
 
-    async def execute(
-        self, input_data: Any, context: Optional[Dict[str, Any]] = None
-    ) -> Tuple[Any, Optional[str]]:
+    async def execute(self, input_data: Any, context: Optional[Dict[str, Any]] = None) -> Tuple[Any, Optional[str]]:
         """
         Execute the Succeed state.
 
@@ -79,9 +77,7 @@ class SucceedState(BaseState):
             processed_input = processor.apply_input_path(input_data, self.input_path)
 
             # Process output path
-            final_output = processor.apply_output_path(
-                processed_input, self.output_path
-            )
+            final_output = processor.apply_output_path(processed_input, self.output_path)
 
             # Succeed states always end execution (no next state, no error)
             return final_output, None
@@ -107,10 +103,7 @@ class SucceedState(BaseState):
 
         # Succeed state specific validations
         if self.type != "Succeed":
-            raise ValueError(
-                f"Succeed state '{self.name}' must have Type 'Succeed', "
-                f"got '{self.type}'"
-            )
+            raise ValueError(f"Succeed state '{self.name}' must have Type 'Succeed', " f"got '{self.type}'")
 
         # Succeed states cannot have Next field (they're implicitly end states)
         if self.next_state is not None:
@@ -118,9 +111,7 @@ class SucceedState(BaseState):
 
         # Succeed states cannot have End field (it's implicit)
         if self.end:
-            raise ValueError(
-                f"Succeed state '{self.name}' cannot have End field (it's implicit)"
-            )
+            raise ValueError(f"Succeed state '{self.name}' cannot have End field (it's implicit)")
 
         # Succeed states cannot have ResultPath
         if self.result_path is not None:

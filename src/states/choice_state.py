@@ -135,9 +135,7 @@ class ChoiceState(BaseState):
         self.comment = comment
         super().__post_init__()
 
-    def validate(
-        self, skip_name=False, skip_type: bool = False, skip_next_state: bool = False
-    ) -> None:
+    def validate(self, skip_name=False, skip_type: bool = False, skip_next_state: bool = False) -> None:
         """Validate the Choice state configuration."""
         # Validate basic fields
         if not self.name:
@@ -156,17 +154,13 @@ class ChoiceState(BaseState):
 
         # Must have at least one choice or a default
         if not self.choices and self.default is None:
-            raise ValueError(
-                f"Choice state '{self.name}' must have either Choices or Default"
-            )
+            raise ValueError(f"Choice state '{self.name}' must have either Choices or Default")
 
         # Validate each choice
         for i, choice in enumerate(self.choices):
             self._validate_choice(choice, i, next_required=True)
 
-    def _validate_choice(
-        self, choice: ChoiceRule, index: int, next_required: bool
-    ) -> None:
+    def _validate_choice(self, choice: ChoiceRule, index: int, next_required: bool) -> None:
         """Validate a single choice rule."""
         # Count operators
         comparison_count = self._count_comparison_operators(choice)
@@ -174,16 +168,11 @@ class ChoiceState(BaseState):
 
         # For rules with comparison operators, Variable is required
         if comparison_count > 0 and not choice.variable:
-            raise ValueError(
-                f"Choice {index}: Variable is required for comparison operators"
-            )
+            raise ValueError(f"Choice {index}: Variable is required for comparison operators")
 
         # Must have at least one operator
         if comparison_count == 0 and compound_count == 0:
-            raise ValueError(
-                f"Choice {index}: must have at least one comparison operator "
-                f"or compound operator"
-            )
+            raise ValueError(f"Choice {index}: must have at least one comparison operator " f"or compound operator")
 
         # Validate Next field if required
         if next_required and not choice.next:
@@ -236,9 +225,7 @@ class ChoiceState(BaseState):
             count += 1
         return count
 
-    async def execute(
-        self, input_data: Any, context: Optional[Dict[str, Any]] = None
-    ) -> tuple[Any, Optional[str]]:
+    async def execute(self, input_data: Any, context: Optional[Dict[str, Any]] = None) -> tuple[Any, Optional[str]]:
         """Execute the Choice state."""
         # Get path processor
         processor = self._path_processor or get_path_processor()
@@ -250,22 +237,14 @@ class ChoiceState(BaseState):
         for choice in self.choices:
             if self._evaluate_choice(choice, processed_input):
                 # Apply result path and output path
-                processed_result = processor.apply_result_path(
-                    processed_input, processed_input, self.result_path
-                )
-                final_output = processor.apply_output_path(
-                    processed_result, self.output_path
-                )
+                processed_result = processor.apply_result_path(processed_input, processed_input, self.result_path)
+                final_output = processor.apply_output_path(processed_result, self.output_path)
                 return final_output, choice.next
 
         # No choice matched, use default if specified
         if self.default is not None:
-            processed_result = processor.apply_result_path(
-                processed_input, processed_input, self.result_path
-            )
-            final_output = processor.apply_output_path(
-                processed_result, self.output_path
-            )
+            processed_result = processor.apply_result_path(processed_input, processed_input, self.result_path)
+            final_output = processor.apply_output_path(processed_result, self.output_path)
             return final_output, self.default
 
         # No choice matched and no default - this is an error
@@ -315,47 +294,27 @@ class ChoiceState(BaseState):
         """Evaluate comparison operators."""
         # String comparisons
         if rule.string_equals is not None:
-            return self._compare_string(
-                variable_value, rule.string_equals, lambda a, b: a == b
-            )
+            return self._compare_string(variable_value, rule.string_equals, lambda a, b: a == b)
         if rule.string_less_than is not None:
-            return self._compare_string(
-                variable_value, rule.string_less_than, lambda a, b: a < b
-            )
+            return self._compare_string(variable_value, rule.string_less_than, lambda a, b: a < b)
         if rule.string_greater_than is not None:
-            return self._compare_string(
-                variable_value, rule.string_greater_than, lambda a, b: a > b
-            )
+            return self._compare_string(variable_value, rule.string_greater_than, lambda a, b: a > b)
         if rule.string_less_than_equals is not None:
-            return self._compare_string(
-                variable_value, rule.string_less_than_equals, lambda a, b: a <= b
-            )
+            return self._compare_string(variable_value, rule.string_less_than_equals, lambda a, b: a <= b)
         if rule.string_greater_than_equals is not None:
-            return self._compare_string(
-                variable_value, rule.string_greater_than_equals, lambda a, b: a >= b
-            )
+            return self._compare_string(variable_value, rule.string_greater_than_equals, lambda a, b: a >= b)
 
         # Numeric comparisons
         if rule.numeric_equals is not None:
-            return self._compare_numeric(
-                variable_value, rule.numeric_equals, lambda a, b: a == b
-            )
+            return self._compare_numeric(variable_value, rule.numeric_equals, lambda a, b: a == b)
         if rule.numeric_less_than is not None:
-            return self._compare_numeric(
-                variable_value, rule.numeric_less_than, lambda a, b: a < b
-            )
+            return self._compare_numeric(variable_value, rule.numeric_less_than, lambda a, b: a < b)
         if rule.numeric_greater_than is not None:
-            return self._compare_numeric(
-                variable_value, rule.numeric_greater_than, lambda a, b: a > b
-            )
+            return self._compare_numeric(variable_value, rule.numeric_greater_than, lambda a, b: a > b)
         if rule.numeric_less_than_equals is not None:
-            return self._compare_numeric(
-                variable_value, rule.numeric_less_than_equals, lambda a, b: a <= b
-            )
+            return self._compare_numeric(variable_value, rule.numeric_less_than_equals, lambda a, b: a <= b)
         if rule.numeric_greater_than_equals is not None:
-            return self._compare_numeric(
-                variable_value, rule.numeric_greater_than_equals, lambda a, b: a >= b
-            )
+            return self._compare_numeric(variable_value, rule.numeric_greater_than_equals, lambda a, b: a >= b)
 
         # Boolean comparison
         if rule.boolean_equals is not None:
@@ -363,25 +322,15 @@ class ChoiceState(BaseState):
 
         # Timestamp comparisons
         if rule.timestamp_equals is not None:
-            return self._compare_timestamp(
-                variable_value, rule.timestamp_equals, lambda a, b: a == b
-            )
+            return self._compare_timestamp(variable_value, rule.timestamp_equals, lambda a, b: a == b)
         if rule.timestamp_less_than is not None:
-            return self._compare_timestamp(
-                variable_value, rule.timestamp_less_than, lambda a, b: a < b
-            )
+            return self._compare_timestamp(variable_value, rule.timestamp_less_than, lambda a, b: a < b)
         if rule.timestamp_greater_than is not None:
-            return self._compare_timestamp(
-                variable_value, rule.timestamp_greater_than, lambda a, b: a > b
-            )
+            return self._compare_timestamp(variable_value, rule.timestamp_greater_than, lambda a, b: a > b)
         if rule.timestamp_less_than_equals is not None:
-            return self._compare_timestamp(
-                variable_value, rule.timestamp_less_than_equals, lambda a, b: a <= b
-            )
+            return self._compare_timestamp(variable_value, rule.timestamp_less_than_equals, lambda a, b: a <= b)
         if rule.timestamp_greater_than_equals is not None:
-            return self._compare_timestamp(
-                variable_value, rule.timestamp_greater_than_equals, lambda a, b: a >= b
-            )
+            return self._compare_timestamp(variable_value, rule.timestamp_greater_than_equals, lambda a, b: a >= b)
 
         raise StateError("no comparison operator specified in choice rule")
 
@@ -393,9 +342,7 @@ class ChoiceState(BaseState):
             str_value = str(variable_value)
         return compare_func(str_value, expected)
 
-    def _compare_numeric(
-        self, variable_value: Any, expected: float, compare_func
-    ) -> bool:
+    def _compare_numeric(self, variable_value: Any, expected: float, compare_func) -> bool:
         """Compare numeric values."""
         try:
             if isinstance(variable_value, (int, float)):
@@ -420,9 +367,7 @@ class ChoiceState(BaseState):
                 return expected is False
         return False
 
-    def _compare_timestamp(
-        self, variable_value: Any, expected_str: str, compare_func
-    ) -> bool:
+    def _compare_timestamp(self, variable_value: Any, expected_str: str, compare_func) -> bool:
         """Compare timestamp values."""
         try:
             # Parse expected timestamp
@@ -439,9 +384,7 @@ class ChoiceState(BaseState):
             else:
                 return False
 
-            return compare_func(
-                variable_time.astimezone(expected_time.tzinfo), expected_time
-            )
+            return compare_func(variable_time.astimezone(expected_time.tzinfo), expected_time)
         except (ValueError, TypeError):
             return False
 

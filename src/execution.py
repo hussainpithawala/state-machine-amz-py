@@ -236,10 +236,7 @@ class Execution:
 
     def __str__(self) -> str:
         """String representation of execution."""
-        return (
-            f"Execution(id={self.id}, name={self.name}, status={self.status}, "
-            f"states={len(self.history)})"
-        )
+        return f"Execution(id={self.id}, name={self.name}, status={self.status}, " f"states={len(self.history)})"
 
 
 def _generate_execution_id() -> str:

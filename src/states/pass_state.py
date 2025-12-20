@@ -67,9 +67,7 @@ class PassState(BaseState):
         # Call parent validation
         self.validate()
 
-    async def execute(
-        self, input_data: Any, context: Optional[Dict[str, Any]] = None
-    ) -> Tuple[Any, Optional[str]]:
+    async def execute(self, input_data: Any, context: Optional[Dict[str, Any]] = None) -> Tuple[Any, Optional[str]]:
         """
         Execute the Pass state.
 
@@ -104,9 +102,7 @@ class PassState(BaseState):
 
             # Apply result path
             if state_result is not None:
-                combined_data = processor.apply_result_path(
-                    processed_input, state_result, self.result_path
-                )
+                combined_data = processor.apply_result_path(processed_input, state_result, self.result_path)
             else:
                 combined_data = processed_input
 
@@ -133,15 +129,11 @@ class PassState(BaseState):
         """
         # Pass state specific validations
         if self.type != "Pass":
-            raise ValueError(
-                f"Pass state '{self.name}' must have Type 'Pass', " f"got '{self.type}'"
-            )
+            raise ValueError(f"Pass state '{self.name}' must have Type 'Pass', " f"got '{self.type}'")
 
         # Cannot have both Result and Parameters
         if self.result is not None and self.parameters is not None:
-            raise ValueError(
-                f"Pass state '{self.name}' cannot have both Result and Parameters"
-            )
+            raise ValueError(f"Pass state '{self.name}' cannot have both Result and Parameters")
 
         # Call parent validation
         super().validate(skip_type=True, skip_next_state=False)
