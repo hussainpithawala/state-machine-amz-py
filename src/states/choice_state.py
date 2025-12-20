@@ -51,42 +51,30 @@ class ChoiceRule:
             "Next": self.next,
         }
 
-        # Add comparison operators if present
-        if self.string_equals is not None:
-            result["StringEquals"] = self.string_equals
-        if self.string_less_than is not None:
-            result["StringLessThan"] = self.string_less_than
-        if self.string_greater_than is not None:
-            result["StringGreaterThan"] = self.string_greater_than
-        if self.string_less_than_equals is not None:
-            result["StringLessThanEquals"] = self.string_less_than_equals
-        if self.string_greater_than_equals is not None:
-            result["StringGreaterThanEquals"] = self.string_greater_than_equals
+        # Mapping of attribute names to their JSON keys for comparison operators
+        comparison_ops = {
+            "string_equals": "StringEquals",
+            "string_less_than": "StringLessThan",
+            "string_greater_than": "StringGreaterThan",
+            "string_less_than_equals": "StringLessThanEquals",
+            "string_greater_than_equals": "StringGreaterThanEquals",
+            "numeric_equals": "NumericEquals",
+            "numeric_less_than": "NumericLessThan",
+            "numeric_greater_than": "NumericGreaterThan",
+            "numeric_less_than_equals": "NumericLessThanEquals",
+            "numeric_greater_than_equals": "NumericGreaterThanEquals",
+            "boolean_equals": "BooleanEquals",
+            "timestamp_equals": "TimestampEquals",
+            "timestamp_less_than": "TimestampLessThan",
+            "timestamp_greater_than": "TimestampGreaterThan",
+            "timestamp_less_than_equals": "TimestampLessThanEquals",
+            "timestamp_greater_than_equals": "TimestampGreaterThanEquals",
+        }
 
-        if self.numeric_equals is not None:
-            result["NumericEquals"] = self.numeric_equals
-        if self.numeric_less_than is not None:
-            result["NumericLessThan"] = self.numeric_less_than
-        if self.numeric_greater_than is not None:
-            result["NumericGreaterThan"] = self.numeric_greater_than
-        if self.numeric_less_than_equals is not None:
-            result["NumericLessThanEquals"] = self.numeric_less_than_equals
-        if self.numeric_greater_than_equals is not None:
-            result["NumericGreaterThanEquals"] = self.numeric_greater_than_equals
-
-        if self.boolean_equals is not None:
-            result["BooleanEquals"] = self.boolean_equals
-
-        if self.timestamp_equals is not None:
-            result["TimestampEquals"] = self.timestamp_equals
-        if self.timestamp_less_than is not None:
-            result["TimestampLessThan"] = self.timestamp_less_than
-        if self.timestamp_greater_than is not None:
-            result["TimestampGreaterThan"] = self.timestamp_greater_than
-        if self.timestamp_less_than_equals is not None:
-            result["TimestampLessThanEquals"] = self.timestamp_less_than_equals
-        if self.timestamp_greater_than_equals is not None:
-            result["TimestampGreaterThanEquals"] = self.timestamp_greater_than_equals
+        for attr, key in comparison_ops.items():
+            value = getattr(self, attr)
+            if value is not None:
+                result[key] = value
 
         # Add compound operators if present
         if self.and_rules:
@@ -292,45 +280,30 @@ class ChoiceState(BaseState):
 
     def _evaluate_comparison(self, rule: ChoiceRule, variable_value: Any) -> bool:
         """Evaluate comparison operators."""
-        # String comparisons
-        if rule.string_equals is not None:
-            return self._compare_string(variable_value, rule.string_equals, lambda a, b: a == b)
-        if rule.string_less_than is not None:
-            return self._compare_string(variable_value, rule.string_less_than, lambda a, b: a < b)
-        if rule.string_greater_than is not None:
-            return self._compare_string(variable_value, rule.string_greater_than, lambda a, b: a > b)
-        if rule.string_less_than_equals is not None:
-            return self._compare_string(variable_value, rule.string_less_than_equals, lambda a, b: a <= b)
-        if rule.string_greater_than_equals is not None:
-            return self._compare_string(variable_value, rule.string_greater_than_equals, lambda a, b: a >= b)
+        # Define comparison configurations: (attribute_name, handler_method, comparison_lambda)
+        comparisons = [
+            ("string_equals", self._compare_string, lambda a, b: a == b),
+            ("string_less_than", self._compare_string, lambda a, b: a < b),
+            ("string_greater_than", self._compare_string, lambda a, b: a > b),
+            ("string_less_than_equals", self._compare_string, lambda a, b: a <= b),
+            ("string_greater_than_equals", self._compare_string, lambda a, b: a >= b),
+            ("numeric_equals", self._compare_numeric, lambda a, b: a == b),
+            ("numeric_less_than", self._compare_numeric, lambda a, b: a < b),
+            ("numeric_greater_than", self._compare_numeric, lambda a, b: a > b),
+            ("numeric_less_than_equals", self._compare_numeric, lambda a, b: a <= b),
+            ("numeric_greater_than_equals", self._compare_numeric, lambda a, b: a >= b),
+            ("boolean_equals", lambda v, e, _: self._compare_boolean(v, e), None),
+            ("timestamp_equals", self._compare_timestamp, lambda a, b: a == b),
+            ("timestamp_less_than", self._compare_timestamp, lambda a, b: a < b),
+            ("timestamp_greater_than", self._compare_timestamp, lambda a, b: a > b),
+            ("timestamp_less_than_equals", self._compare_timestamp, lambda a, b: a <= b),
+            ("timestamp_greater_than_equals", self._compare_timestamp, lambda a, b: a >= b),
+        ]
 
-        # Numeric comparisons
-        if rule.numeric_equals is not None:
-            return self._compare_numeric(variable_value, rule.numeric_equals, lambda a, b: a == b)
-        if rule.numeric_less_than is not None:
-            return self._compare_numeric(variable_value, rule.numeric_less_than, lambda a, b: a < b)
-        if rule.numeric_greater_than is not None:
-            return self._compare_numeric(variable_value, rule.numeric_greater_than, lambda a, b: a > b)
-        if rule.numeric_less_than_equals is not None:
-            return self._compare_numeric(variable_value, rule.numeric_less_than_equals, lambda a, b: a <= b)
-        if rule.numeric_greater_than_equals is not None:
-            return self._compare_numeric(variable_value, rule.numeric_greater_than_equals, lambda a, b: a >= b)
-
-        # Boolean comparison
-        if rule.boolean_equals is not None:
-            return self._compare_boolean(variable_value, rule.boolean_equals)
-
-        # Timestamp comparisons
-        if rule.timestamp_equals is not None:
-            return self._compare_timestamp(variable_value, rule.timestamp_equals, lambda a, b: a == b)
-        if rule.timestamp_less_than is not None:
-            return self._compare_timestamp(variable_value, rule.timestamp_less_than, lambda a, b: a < b)
-        if rule.timestamp_greater_than is not None:
-            return self._compare_timestamp(variable_value, rule.timestamp_greater_than, lambda a, b: a > b)
-        if rule.timestamp_less_than_equals is not None:
-            return self._compare_timestamp(variable_value, rule.timestamp_less_than_equals, lambda a, b: a <= b)
-        if rule.timestamp_greater_than_equals is not None:
-            return self._compare_timestamp(variable_value, rule.timestamp_greater_than_equals, lambda a, b: a >= b)
+        for attr, handler, op in comparisons:
+            expected = getattr(rule, attr)
+            if expected is not None:
+                return handler(variable_value, expected, op)
 
         raise StateError("no comparison operator specified in choice rule")
 
