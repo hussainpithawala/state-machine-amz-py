@@ -340,39 +340,19 @@ class WaitState(BaseState):
         Returns:
             Dictionary representation of the state
         """
-        result: Dict[str, Any] = {
-            "Type": self.type,
+        result = super().to_dict()
+
+        # Add wait-specific fields
+        wait_fields = {
+            "Seconds": self.seconds,
+            "SecondsPath": self.seconds_path,
+            "Timestamp": self.timestamp,
+            "TimestampPath": self.timestamp_path,
         }
 
-        if self.next_state is not None:
-            result["Next"] = self.next_state
-
-        if self.end:
-            result["End"] = self.end
-
-        if self.input_path is not None:
-            result["InputPath"] = self.input_path
-
-        if self.result_path is not None:
-            result["ResultPath"] = self.result_path
-
-        if self.output_path is not None:
-            result["OutputPath"] = self.output_path
-
-        if self.seconds is not None:
-            result["Seconds"] = self.seconds
-
-        if self.seconds_path is not None:
-            result["SecondsPath"] = self.seconds_path
-
-        if self.timestamp is not None:
-            result["Timestamp"] = self.timestamp
-
-        if self.timestamp_path is not None:
-            result["TimestampPath"] = self.timestamp_path
-
-        if self.comment is not None:
-            result["Comment"] = self.comment
+        for key, value in wait_fields.items():
+            if value is not None:
+                result[key] = value
 
         return result
 
