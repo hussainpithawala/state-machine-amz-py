@@ -16,6 +16,7 @@ from sqlalchemy import (
     UniqueConstraint,
     text,
 )
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
@@ -33,14 +34,14 @@ class ExecutionModel(Base):
     )
     state_machine_id: Mapped[str] = mapped_column(String(255), index=True)
     name: Mapped[str] = mapped_column(String(255))
-    input: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
-    output: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    input: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
+    output: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
     status: Mapped[str] = mapped_column(String(50), index=True)
     start_time: Mapped[datetime] = mapped_column(index=True)
     end_time: Mapped[Optional[datetime]] = mapped_column(nullable=True)
     current_state: Mapped[str] = mapped_column(String(255))
     error: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    metadata_: Mapped[dict] = mapped_column("metadata", JSON, default=dict)
+    metadata_: Mapped[dict] = mapped_column("metadata", JSONB, default=dict)
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(
         default=datetime.utcnow, onupdate=datetime.utcnow
@@ -87,15 +88,15 @@ class StateHistoryModel(Base):
     execution_start_time: Mapped[datetime] = mapped_column()
     state_name: Mapped[str] = mapped_column(String(255), index=True)
     state_type: Mapped[str] = mapped_column(String(50))
-    input: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
-    output: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    input: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
+    output: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
     status: Mapped[str] = mapped_column(String(50), index=True)
     start_time: Mapped[datetime] = mapped_column(index=True)
     end_time: Mapped[Optional[datetime]] = mapped_column(nullable=True)
     error: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     retry_count: Mapped[int] = mapped_column(Integer, default=0)
     sequence_number: Mapped[int] = mapped_column(index=True)
-    metadata_: Mapped[dict] = mapped_column("metadata", JSON, default=dict)
+    metadata_: Mapped[dict] = mapped_column("metadata", JSONB, default=dict)
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
 
     # Relationship to execution
