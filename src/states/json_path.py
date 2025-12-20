@@ -173,47 +173,59 @@ class JSONPathProcessor(PathProcessor):
         for part in parts:
             if part == "":
                 continue
-
-            # Handle array index
-            if part.startswith("[") and part.endswith("]"):
-                try:
-                    index_str = part[1:-1]
-                    index = int(index_str)
-
-                    if not isinstance(current, list):
-                        # Check at the root level if it's an array at '$
-                        sub_current = current.get("$", None)
-                        if sub_current is not None and isinstance(sub_current, list):
-                            current = sub_current
-                        else:
-                            raise ValueError("cannot index non-array")
-
-                    if index < 0 or index >= len(current):
-                        raise ValueError(f"array index {index} out of bounds")
-
-                    current = current[index]
-                    continue
-                except ValueError as ve:
-                    raise ValueError(f"invalid array index: {part}", ve)
-
-            # Handle object field
-            # Check if current is a dict and has the key directly
-            if isinstance(current, dict):
-                if part in current:
-                    current = current[part]
-                    continue
-
-            # Check for nested structure with "$" key (from Go implementation)
-            if isinstance(current, dict) and "$" in current:
-                nested = current["$"]
-                if isinstance(nested, dict) and part in nested:
-                    current = nested[part]
-                    continue
-
-            # Field not found
-            raise ValueError(f"field '{part}' not found")
+            current = self._handle_part(current, part)
 
         return current
+
+    def _handle_part(self, current: Any, part: str) -> Any:
+        """Handle a single part of a JSONPath."""
+        # Handle array index
+        if part.startswith("[") and part.endswith("]"):
+            return self._handle_array_index(current, part)
+
+        # Handle object field
+        return self._handle_object_field(current, part)
+
+    def _handle_array_index(self, current: Any, part: str) -> Any:
+        """Handle array index part."""
+        try:
+            index_str = part[1:-1]
+            index = int(index_str)
+
+            if not isinstance(current, list):
+                # Check at the root level if it's an array at '$'
+                if isinstance(current, dict):
+                    sub_current = current.get("$")
+                    if isinstance(sub_current, list):
+                        current = sub_current
+                    else:
+                        raise ValueError("cannot index non-array")
+                else:
+                    raise ValueError("cannot index non-array")
+
+            if index < 0 or index >= len(current):
+                raise ValueError(f"array index {index} out of bounds")
+
+            return current[index]
+        except ValueError as ve:
+            if "array index" in str(ve) or "cannot index non-array" in str(ve):
+                raise ve
+            raise ValueError(f"invalid array index: {part}", ve)
+
+    def _handle_object_field(self, current: Any, part: str) -> Any:
+        """Handle object field part."""
+        if isinstance(current, dict):
+            if part in current:
+                return current[part]
+
+            # Check for nested structure with "$" key (from Go implementation)
+            if "$" in current:
+                nested = current["$"]
+                if isinstance(nested, dict) and part in nested:
+                    return nested[part]
+
+        # Field not found
+        raise ValueError(f"field '{part}' not found")
 
     def set_value(self, data: Any, path: str, value: Any) -> Any:
         """
@@ -230,38 +242,7 @@ class JSONPathProcessor(PathProcessor):
         if path == "$":
             return value
 
-        if not path.startswith("$"):
-            raise ValueError("path must start with '$'")
-
-        # Parse the path
-        path = path[1:]  # Remove "$"
-        if path.startswith("."):
-            path = path[1:]  # Remove leading "."
-
-        parts = self.split_path(path)
-
-        # Start with the value and wrap it
-        result = value
-        for i in range(len(parts) - 1, -1, -1):
-            part = parts[i]
-            if part == "":
-                continue
-
-            if part.startswith("[") and part.endswith("]"):
-                # Array index - create array
-                try:
-                    index_str = part[1:-1]
-                    index = int(index_str)
-
-                    # Create array with value at index
-                    arr = [None] * (index + 1)
-                    arr[index] = result
-                    result = arr
-                except ValueError as ve:
-                    raise ValueError(f"invalid array index: {part}", ve)
-            else:
-                # Object field
-                result = {part: result}
+        result = self.wrap_value(path, value)
 
         # Merge with original data if it's a map
         if isinstance(data, dict) and isinstance(result, dict):
@@ -284,7 +265,7 @@ class JSONPathProcessor(PathProcessor):
             return value
 
         if not path.startswith("$"):
-            return ValueError("path must start with '$'")
+            raise ValueError("path must start with '$'")
 
         # Parse the path
         path = path[1:]  # Remove "$"
@@ -300,23 +281,27 @@ class JSONPathProcessor(PathProcessor):
             if part == "":
                 continue
 
-            if part.startswith("[") and part.endswith("]"):
-                # Array index - create array
-                try:
-                    index_str = part[1:-1]
-                    index = int(index_str)
-
-                    # Create array with value at index
-                    arr = [None] * (index + 1)
-                    arr[index] = result
-                    result = arr
-                except ValueError as ve:
-                    return ValueError(f"invalid array index: {part}", ve)
-            else:
-                # Object field
-                result = {part: result}
+            result = self._wrap_part(result, part)
 
         return result
+
+    def _wrap_part(self, current: Any, part: str) -> Any:
+        """Wrap a value with a single path part."""
+        if part.startswith("[") and part.endswith("]"):
+            # Array index - create array
+            try:
+                index_str = part[1:-1]
+                index = int(index_str)
+
+                # Create array with value at index
+                arr = [None] * (index + 1)
+                arr[index] = current
+                return arr
+            except ValueError as ve:
+                raise ValueError(f"invalid array index: {part}", ve)
+        else:
+            # Object field
+            return {part: current}
 
     def expand_parameters(self, params: Dict[str, Any], input_data: Any) -> Dict[str, Any]:
         """
