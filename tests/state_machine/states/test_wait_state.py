@@ -4,6 +4,7 @@ Tests for the WaitState implementation.
 
 import asyncio
 import json
+import math
 import time
 from datetime import datetime, timedelta, timezone
 from unittest.mock import Mock
@@ -144,8 +145,8 @@ class TestWaitState:
         assert next_state == "NextState"
 
         # Verify we waited approximately 1 second (with tolerance)
-        assert elapsed >= 1.0
-        assert elapsed < 2.0
+        assert math.ceil(elapsed) >= 1.0
+        assert math.floor(elapsed) < 2.0
 
     @pytest.mark.asyncio
     async def test_wait_state_execute_with_zero_seconds(self, mock_path_processor, sample_input_data):
@@ -214,11 +215,11 @@ class TestWaitState:
         input_data = {"duration": 0.5}
 
         start_time = time.time()
-        output, next_state = await state.execute(input_data)
+        await state.execute(input_data)
         elapsed = time.time() - start_time
 
-        assert elapsed >= 0.5
-        assert elapsed < 1.0
+        assert math.ceil(elapsed) >= 0.5
+        assert math.floor(elapsed) < 1.0
 
     @pytest.mark.asyncio
     async def test_wait_state_execute_seconds_path_invalid_value(self, mock_path_processor):

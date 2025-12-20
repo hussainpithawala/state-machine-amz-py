@@ -13,9 +13,9 @@ from datetime import datetime
 from pprint import pprint
 from typing import Any, Dict, Optional
 
+from examples import ExampleTaskHandler
 from sqlalchemy import text
 
-from examples import ExampleTaskHandler
 from src.machine import PersistentStateMachine
 from src.repository import PersistenceManager, RepositoryConfig, new_persistence_manager
 from src.states import with_execution_context
@@ -256,9 +256,7 @@ async def demo_4_validation_failure(persistence_manager: PersistenceManager):
 
     exec_ctx.register_handler(
         "validate",
-        ExampleTaskHandler(
-            execute_func=validate_handler, execute_with_timeout_func=validate_handler
-        ),
+        ExampleTaskHandler(execute_func=validate_handler, execute_with_timeout_func=validate_handler),
     )
 
     # Create state machine with error handling
@@ -320,7 +318,7 @@ def setup_persistent_manager() -> PersistenceManager:
     # Get connection string from environment or use default
     conn_url = os.getenv(
         "POSTGRES_TEST_URL",
-        "postgresql://postgres:postgres@localhost:5432/statemachine_test_py_sql",
+        "postgresql://postgres:postgres@localhost:5432/statemachine_demo",
     )
 
     config = RepositoryConfig(
@@ -687,9 +685,7 @@ async def demo_6_parallel_execution(persistence_manager: PersistenceManager):
         elapsed = datetime.now() - start
 
         print(f"\nStatus: {execution.status}")
-        print(
-            f"Parallel execution time: {elapsed.microseconds/1000: .2f} milli-seconds"
-        )
+        print(f"Parallel execution time: {elapsed.microseconds/1000: .2f} milli-seconds")
         print(f"Results: {execution.output}")
         history = await psm.get_execution_history(execution_id=execution.id)
         pprint(history)
