@@ -6,10 +6,6 @@ Creates appropriate state objects based on type.
 
 from typing import Any, Dict
 
-# Import all state types
-# Note: These imports assume the states are in a 'states' module
-# Adjust the imports based on your actual module structure
-
 
 class StateFactory:
     """
@@ -27,27 +23,15 @@ class StateFactory:
     def _register_default_creators(self) -> None:
         """Register default state creators."""
         # Import state classes
-        try:
-            from src.states import (
-                FailState,
-                ParallelState,
-                PassState,
-                SucceedState,
-                TaskState,
-                WaitState,
-            )
-
-            self._creators = {
-                "Pass": self._create_pass_state,
-                "Fail": self._create_fail_state,
-                "Succeed": self._create_succeed_state,
-                "Wait": self._create_wait_state,
-                "Task": self._create_task_state,
-                "Parallel": self._create_parallel_state,
-                "Choice": self._create_choice_state,
-            }
-        except ImportError as ie:
-            raise ie
+        self._creators = {
+            "Pass": self._create_pass_state,
+            "Fail": self._create_fail_state,
+            "Succeed": self._create_succeed_state,
+            "Wait": self._create_wait_state,
+            "Task": self._create_task_state,
+            "Parallel": self._create_parallel_state,
+            "Choice": self._create_choice_state,
+        }
 
     def create_state(self, name: str, state_data: Dict[str, Any]) -> Any:
         """
@@ -230,9 +214,7 @@ class StateFactory:
                 timestamp_less_than=rule_data.get("TimestampLessThan"),
                 timestamp_greater_than=rule_data.get("TimestampGreaterThan"),
                 timestamp_less_than_equals=rule_data.get("TimestampLessThanEquals"),
-                timestamp_greater_than_equals=rule_data.get(
-                    "TimestampGreaterThanEquals"
-                ),
+                timestamp_greater_than_equals=rule_data.get("TimestampGreaterThanEquals"),
                 comment=rule_data.get("Comment"),
             )
             if "And" in rule_data:

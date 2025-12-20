@@ -167,61 +167,52 @@ class TaskState(BaseState):
         self.type = "Task"
         self.validate(skip_type=True, skip_next_state=False)
 
-    def validate(self, skip_type=False, skip_next_state=False) -> None:
+    def validate(self, skip_type: bool = False, skip_next_state: bool = False) -> None:
         """Validate task state configuration."""
         super().validate(skip_type, skip_next_state)
 
+        self._validate_resource()
+        self._validate_timeout_seconds()
+        self._validate_heartbeat_seconds()
+        self._validate_heartbeat_less_than_timeout()
+        self._validate_retry_policies()
+        self._validate_catch_policies()
+
+    def _validate_resource(self) -> None:
         if not self.resource:
             raise ValueError(f"Task state '{self.name}' Resource is required")
 
+    def _validate_timeout_seconds(self) -> None:
         if self.timeout_seconds is not None and self.timeout_seconds <= 0:
-            raise ValueError(
-                f"Task state '{self.name}' TimeoutSeconds must be positive"
-            )
+            raise ValueError(f"Task state '{self.name}' TimeoutSeconds must be positive")
 
+    def _validate_heartbeat_seconds(self) -> None:
         if self.heartbeat_seconds is not None and self.heartbeat_seconds <= 0:
-            raise ValueError(
-                f"Task state '{self.name}' HeartbeatSeconds must be positive"
-            )
+            raise ValueError(f"Task state '{self.name}' HeartbeatSeconds must be positive")
 
+    def _validate_heartbeat_less_than_timeout(self) -> None:
         if (
             self.heartbeat_seconds is not None
             and self.timeout_seconds is not None
             and self.heartbeat_seconds >= self.timeout_seconds
         ):
-            raise ValueError(
-                f"Task state '{self.name}' HeartbeatSeconds"
-                f" must be less than TimeoutSeconds"
-            )
+            raise ValueError(f"Task state '{self.name}' HeartbeatSeconds must be less than TimeoutSeconds")
 
-        # Validate retry policies
+    def _validate_retry_policies(self) -> None:
         for i, retry_policy in enumerate(self.retry):
             if not retry_policy.error_equals:
-                raise ValueError(
-                    f"Task state '{self.name}' Retry policy {i}: "
-                    f"ErrorEquals is required"
-                )
+                raise ValueError(f"Task state '{self.name}' Retry policy {i}: ErrorEquals is required")
             if retry_policy.backoff_rate < 1.0:
-                raise ValueError(
-                    f"Task state '{self.name}' Retry policy {i}: "
-                    f"BackoffRate must be >= 1.0"
-                )
+                raise ValueError(f"Task state '{self.name}' Retry policy {i}: BackoffRate must be >= 1.0")
 
-        # Validate catch policies
+    def _validate_catch_policies(self) -> None:
         for i, catch_policy in enumerate(self.catch):
             if not catch_policy.error_equals:
-                raise ValueError(
-                    f"Task state '{self.name}' Catch policy {i}: "
-                    f"ErrorEquals is required"
-                )
+                raise ValueError(f"Task state '{self.name}' Catch policy {i}: ErrorEquals is required")
             if not catch_policy.next_state:
-                raise ValueError(
-                    f"Task state '{self.name}' Catch policy {i}: " f"Next is required"
-                )
+                raise ValueError(f"Task state '{self.name}' Catch policy {i}: Next is required")
 
-    async def execute(
-        self, input_data: Any, context: Optional[Dict[str, Any]] = None
-    ) -> tuple[Any, Optional[str]]:
+    async def execute(self, input_data: Any, context: Optional[Dict[str, Any]] = None) -> tuple[Any, Optional[str]]:
         """Execute the task state."""
         if context is None:
             context = {}
@@ -240,21 +231,15 @@ class TaskState(BaseState):
                 handler = self._get_task_handler()
 
             # Execute task with retry logic
-            result, task_error = await self._execute_with_retry(
-                handler, task_input, context
-            )
+            result, task_error = await self._execute_with_retry(handler, task_input, context)
 
             # Handle task result
-            return await self._handle_task_result(
-                processor, processed_input, result, task_error, context
-            )
+            return await self._handle_task_result(processor, processed_input, result, task_error, context)
 
         except Exception as e:
             if isinstance(e, StateError):
                 raise
-            raise StateError(
-                f"Task execution failed: {str(e)}", self.name, "States.TaskFailed"
-            )
+            raise StateError(f"Task execution failed: {str(e)}", self.name, "States.TaskFailed")
 
     def _prepare_input(self, input_data: Any) -> tuple[Any, Any, Any]:
         """Prepare input by applying input path and parameters."""
@@ -298,9 +283,7 @@ class TaskState(BaseState):
                         context,
                     )
                 elif hasattr(handler, "execute"):
-                    result = await handler.execute(
-                        self.resource, task_input, self.parameters
-                    )
+                    result = await handler.execute(self.resource, task_input, self.parameters)
                 elif callable(handler):
                     result = await handler(self.resource, task_input, self.parameters)
                 else:
@@ -315,9 +298,7 @@ class TaskState(BaseState):
                     return None, task_error
 
                 # Calculate backoff duration
-                backoff_duration = self._calculate_backoff_duration(
-                    task_error, backoff_duration
-                )
+                backoff_duration = self._calculate_backoff_duration(task_error, backoff_duration)
 
                 # Wait before retrying
                 await asyncio.sleep(backoff_duration)
@@ -333,9 +314,7 @@ class TaskState(BaseState):
                 break
         return max_attempts
 
-    def _should_retry(
-        self, task_error: Exception, attempt: int, max_attempts: int
-    ) -> bool:
+    def _should_retry(self, task_error: Exception, attempt: int, max_attempts: int) -> bool:
         """Determine if task should be retried."""
         if attempt >= max_attempts:
             return False
@@ -347,9 +326,7 @@ class TaskState(BaseState):
 
         return False
 
-    def _calculate_backoff_duration(
-        self, task_error: Exception, current_duration: float
-    ) -> float:
+    def _calculate_backoff_duration(self, task_error: Exception, current_duration: float) -> float:
         """Calculate backoff duration for retries."""
         duration = current_duration
 
@@ -382,9 +359,7 @@ class TaskState(BaseState):
     ) -> tuple[Any, Optional[str]]:
         """Handle task result or error."""
         if task_error is not None:
-            return self._handle_task_failure(
-                processor, processed_input, task_error, context
-            )
+            return self._handle_task_failure(processor, processed_input, task_error, context)
 
         return self._process_successful_result(processor, processed_input, result)
 
@@ -399,9 +374,7 @@ class TaskState(BaseState):
         # Check catch policies
         for catch_policy in self.catch:
             if self._error_matches(task_error, catch_policy.error_equals):
-                return self._handle_caught_error(
-                    processor, processed_input, task_error, catch_policy
-                )
+                return self._handle_caught_error(processor, processed_input, task_error, catch_policy)
 
         # No catch policy matched, raise error
         raise task_error
@@ -421,9 +394,7 @@ class TaskState(BaseState):
         }
 
         # Apply result path
-        output = processor.apply_result_path(
-            processed_input, error_result, catch_policy.result_path
-        )
+        output = processor.apply_result_path(processed_input, error_result, catch_policy.result_path)
 
         return output, catch_policy.next_state
 
@@ -501,9 +472,7 @@ class TaskState(BaseState):
         return result
 
 
-def with_execution_context(
-    context: Dict[str, Any], exec_ctx: ExecutionContext
-) -> Dict[str, Any]:
+def with_execution_context(context: Dict[str, Any], exec_ctx: ExecutionContext) -> Dict[str, Any]:
     """Add execution context to context dictionary."""
     context[EXECUTION_CONTEXT_KEY] = exec_ctx
     return context

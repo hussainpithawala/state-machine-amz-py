@@ -4,18 +4,7 @@
 from datetime import datetime
 from typing import List, Optional
 
-from sqlalchemy import (
-    JSON,
-    CheckConstraint,
-    Float,
-    ForeignKey,
-    Index,
-    Integer,
-    String,
-    Text,
-    UniqueConstraint,
-    text,
-)
+from sqlalchemy import CheckConstraint, Float, ForeignKey, Index, Integer, String, Text, UniqueConstraint, text
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
@@ -29,9 +18,7 @@ class ExecutionModel(Base):
 
     __tablename__ = "executions"
 
-    execution_id: Mapped[str] = mapped_column(
-        String(255), primary_key=True, nullable=False
-    )
+    execution_id: Mapped[str] = mapped_column(String(255), primary_key=True, nullable=False)
     state_machine_id: Mapped[str] = mapped_column(String(255), index=True)
     name: Mapped[str] = mapped_column(String(255))
     input: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
@@ -43,9 +30,7 @@ class ExecutionModel(Base):
     error: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     metadata_: Mapped[dict] = mapped_column("metadata", JSONB, default=dict)
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
-    updated_at: Mapped[datetime] = mapped_column(
-        default=datetime.utcnow, onupdate=datetime.utcnow
-    )
+    updated_at: Mapped[datetime] = mapped_column(default=datetime.utcnow, onupdate=datetime.utcnow)
 
     # Relationship to state history
     state_history: Mapped[List["StateHistoryModel"]] = relationship(
@@ -56,9 +41,7 @@ class ExecutionModel(Base):
 
     # Composite indexes and constraints
     __table_args__ = (
-        Index(
-            "idx_executions_sm_status_time", "state_machine_id", "status", "start_time"
-        ),
+        Index("idx_executions_sm_status_time", "state_machine_id", "status", "start_time"),
         Index(
             "idx_executions_running",
             "state_machine_id",
@@ -130,9 +113,7 @@ class ExecutionStatisticsModel(Base):
     max_duration_seconds: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     first_execution: Mapped[datetime] = mapped_column()
     last_execution: Mapped[datetime] = mapped_column()
-    updated_at: Mapped[datetime] = mapped_column(
-        default=datetime.utcnow, onupdate=datetime.utcnow
-    )
+    updated_at: Mapped[datetime] = mapped_column(default=datetime.utcnow, onupdate=datetime.utcnow)
 
     __table_args__ = (
         UniqueConstraint("state_machine_id", "status", name="idx_stats_unique"),

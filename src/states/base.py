@@ -10,16 +10,7 @@ import contextlib
 import json
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import (
-    Any,
-    Dict,
-    Generator,
-    List,
-    Optional,
-    Protocol,
-    TypeVar,
-    runtime_checkable,
-)
+from typing import Any, Dict, Generator, List, Optional, Protocol, TypeVar, runtime_checkable
 
 # Type variable for state input/output
 T = TypeVar("T")
@@ -34,9 +25,7 @@ class PathProcessor(Protocol):
         """Apply input path to filter input data."""
         ...
 
-    def apply_result_path(
-        self, input_data: Any, result: Any, path: Optional[str]
-    ) -> Any:
+    def apply_result_path(self, input_data: Any, result: Any, path: Optional[str]) -> Any:
         """Apply result path to combine input and result."""
         ...
 
@@ -140,9 +129,7 @@ class BaseState(ABC):
     comment: Optional[str] = field(default=None, repr=False)
 
     # Path processor instance (injected)
-    _path_processor: Optional[PathProcessor] = field(
-        default=None, repr=False, compare=False
-    )
+    _path_processor: Optional[PathProcessor] = field(default=None, repr=False, compare=False)
 
     def __post_init__(self) -> None:
         """Validate state configuration after initialization."""
@@ -198,9 +185,7 @@ class BaseState(ABC):
             return [self.next_state]
         return []
 
-    def _apply_paths(
-        self, input_data: Any, result: Any, context: Optional[Dict[str, Any]] = None
-    ) -> Any:
+    def _apply_paths(self, input_data: Any, result: Any, context: Optional[Dict[str, Any]] = None) -> Any:
         """
         Apply input, result, and output paths to data.
 
@@ -223,9 +208,7 @@ class BaseState(ABC):
 
         # Apply result path
         if result is not None:
-            current_data = processor.apply_result_path(
-                current_data, result, self.result_path
-            )
+            current_data = processor.apply_result_path(current_data, result, self.result_path)
 
         # Apply output path
         output = processor.apply_output_path(current_data, self.output_path)
@@ -233,9 +216,7 @@ class BaseState(ABC):
         return output
 
     @abstractmethod
-    async def execute(
-        self, input_data: Any, context: Optional[Dict[str, Any]] = None
-    ) -> tuple[Any, Optional[str]]:
+    async def execute(self, input_data: Any, context: Optional[Dict[str, Any]] = None) -> tuple[Any, Optional[str]]:
         """
         Execute the state with the given input.
 

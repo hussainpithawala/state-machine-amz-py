@@ -79,7 +79,7 @@ class TestJSONPathProcessor:
 
     def test_get_value_path_not_starting_with_dollar(self, processor, sample_data):
         """Test getting value with invalid path."""
-        with pytest.raises(ValueError, match="path must start with '\$'"):
+        with pytest.raises(ValueError, match=r"path must start with '\$'"):
             processor.get_value(sample_data, "metadata.id")
 
     def test_get_value_field_not_found(self, processor, sample_data):
@@ -96,7 +96,7 @@ class TestJSONPathProcessor:
 
     def test_get_value_invalid_array_index(self, processor, sample_data):
         """Test getting value with invalid array index."""
-        with pytest.raises(ValueError, match="invalid array index: \[not-a-number\]"):
+        with pytest.raises(ValueError, match=r"invalid array index: \[not-a-number\]"):
             processor.get_value(sample_data, "$.input.items[not-a-number]")
 
     def test_get_value_index_non_array(self, processor, sample_data):
@@ -153,12 +153,12 @@ class TestJSONPathProcessor:
 
     def test_set_value_path_not_starting_with_dollar(self, processor):
         """Test setting value with invalid path."""
-        with pytest.raises(ValueError, match="path must start with '\$'"):
+        with pytest.raises(ValueError, match=r"path must start with '\$'"):
             processor.set_value({}, "metadata.id", "new-id")
 
     def test_set_value_invalid_array_index(self, processor):
         """Test setting value with invalid array index."""
-        with pytest.raises(ValueError, match="invalid array index: \[not-a-number\]"):
+        with pytest.raises(ValueError, match=r"invalid array index: \[not-a-number\]"):
             processor.set_value({}, "$.items[not-a-number]", "value")
 
     # Test wrap_value method
@@ -190,7 +190,7 @@ class TestJSONPathProcessor:
 
     def test_wrap_value_path_not_starting_with_dollar(self, processor):
         """Test wrapping value with invalid path."""
-        with pytest.raises(ValueError, match="invalid array index: \[not-a-number\]"):
+        with pytest.raises(ValueError, match=r"invalid array index: \[not-a-number\]"):
             processor.set_value({}, "$.items[not-a-number]", "value")
 
     # Test apply_input_path method
@@ -498,7 +498,7 @@ class TestJSONPathProcessor:
 
     def test_apply_input_path_safe_invalid(self, processor, sample_data):
         """Test apply_input_path_safe with invalid path."""
-        with pytest.raises(ValueError, match="path must start with '\$'"):
+        with pytest.raises(ValueError, match=r"path must start with '\$'"):
             processor.apply_input_path_safe(sample_data, "invalid.path")
 
     def test_apply_result_path_safe(self, processor):

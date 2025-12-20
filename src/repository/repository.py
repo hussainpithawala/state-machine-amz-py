@@ -2,7 +2,7 @@
 """Repository manager for persistence operations."""
 
 from datetime import datetime
-from typing import List, Optional
+from typing import List
 
 from .sqlalchemy_postgres import SQLAlchemyPostgresRepository
 from .types import (
@@ -71,14 +71,10 @@ class PersistenceManager:
 
         self.repository.save_execution(record)
 
-    def save_state_history(
-        self, execution_instance: Execution, history: StateHistory
-    ) -> None:
+    def save_state_history(self, execution_instance: Execution, history: StateHistory) -> None:
         """Saves a state history entry."""
         record = StateHistoryRecord(
-            id=generate_history_id(
-                execution_instance.id, history.state_name, datetime.utcnow()
-            ),
+            id=generate_history_id(execution_instance.id, history.state_name, datetime.utcnow()),
             execution_id=execution_instance.id,
             execution_start_time=execution_instance.start_time,
             state_name=history.state_name,

@@ -1,11 +1,6 @@
 """State machine package with persistent execution support."""
 
-from .persistent_statemachine import (
-    PersistentContext,
-    PersistentStateMachine,
-    StateHistoryEntry,
-    StateMachine,
-)
+from .persistent_statemachine import PersistentContext, PersistentStateMachine, StateHistoryEntry, StateMachine
 
 __all__ = [
     # Core classes

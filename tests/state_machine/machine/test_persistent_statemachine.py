@@ -8,12 +8,7 @@ import pytest
 from sqlalchemy import text
 
 from src.machine import PersistentStateMachine
-from src.repository import (
-    ExecutionFilter,
-    PersistenceManager,
-    RepositoryConfig,
-    new_persistence_manager,
-)
+from src.repository import ExecutionFilter, PersistenceManager, RepositoryConfig, new_persistence_manager
 from src.states import with_execution_context
 
 
@@ -41,7 +36,7 @@ class TestPersistentStateMachine():
         # Get connection string from environment or use default
         conn_url = os.getenv(
             "POSTGRES_TEST_URL",
-            "postgresql://postgres:postgres@localhost:5432/statemachine_test_py_sql",
+            "postgresql://postgres:postgres@localhost:5432/statemachine_test",
         )
 
         config = RepositoryConfig(

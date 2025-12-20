@@ -3,7 +3,7 @@
 
 from contextlib import contextmanager
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import List, Optional
 
 from sqlalchemy import create_engine, func, text
 from sqlalchemy.exc import SQLAlchemyError
@@ -106,9 +106,7 @@ class SQLAlchemyPostgresRepository(ExtendedRepository):
 
             # Check if execution exists
             existing = (
-                session.query(ExecutionModel)
-                .filter(ExecutionModel.execution_id == execution.execution_id)
-                .first()
+                session.query(ExecutionModel).filter(ExecutionModel.execution_id == execution.execution_id).first()
             )
 
             if existing:
@@ -123,11 +121,7 @@ class SQLAlchemyPostgresRepository(ExtendedRepository):
     def get_execution(self, execution_id: str) -> ExecutionRecord:
         """Retrieves an execution by ID."""
         with self.get_session() as session:
-            model = (
-                session.query(ExecutionModel)
-                .filter(ExecutionModel.execution_id == execution_id)
-                .first()
-            )
+            model = session.query(ExecutionModel).filter(ExecutionModel.execution_id == execution_id).first()
 
             if not model:
                 raise ValueError(f"execution not found: {execution_id}")
@@ -140,11 +134,7 @@ class SQLAlchemyPostgresRepository(ExtendedRepository):
             model = self._to_state_history_model(history)
 
             # Check if history entry exists
-            existing = (
-                session.query(StateHistoryModel)
-                .filter(StateHistoryModel.id == history.id)
-                .first()
-            )
+            existing = session.query(StateHistoryModel).filter(StateHistoryModel.id == history.id).first()
 
             if existing:
                 # Update existing
@@ -170,9 +160,7 @@ class SQLAlchemyPostgresRepository(ExtendedRepository):
 
             return [self._from_state_history_model(model) for model in models]
 
-    def list_executions(
-        self, list_filter: Optional[ExecutionFilter]
-    ) -> List[ExecutionRecord]:
+    def list_executions(self, list_filter: Optional[ExecutionFilter]) -> List[ExecutionRecord]:
         """Lists executions with filtering and pagination."""
         with self.get_session() as session:
             query = session.query(ExecutionModel)
@@ -206,11 +194,7 @@ class SQLAlchemyPostgresRepository(ExtendedRepository):
     def delete_execution(self, execution_id: str) -> None:
         """Removes an execution and its history (cascade handled by FK)."""
         with self.get_session() as session:
-            result = (
-                session.query(ExecutionModel)
-                .filter(ExecutionModel.execution_id == execution_id)
-                .delete()
-            )
+            result = session.query(ExecutionModel).filter(ExecutionModel.execution_id == execution_id).delete()
 
             if result == 0:
                 raise ValueError(f"execution not found: {execution_id}")
@@ -223,17 +207,11 @@ class SQLAlchemyPostgresRepository(ExtendedRepository):
         except Exception as e:
             raise RuntimeError(f"database health check failed: {e}")
 
-    def get_execution_with_history(
-        self, execution_id: str
-    ) -> tuple[ExecutionRecord, List[StateHistoryRecord]]:
+    def get_execution_with_history(self, execution_id: str) -> tuple[ExecutionRecord, List[StateHistoryRecord]]:
         """Retrieves an execution with its full state history."""
         with self.get_session() as session:
             # Get execution
-            exec_model = (
-                session.query(ExecutionModel)
-                .filter(ExecutionModel.execution_id == execution_id)
-                .first()
-            )
+            exec_model = session.query(ExecutionModel).filter(ExecutionModel.execution_id == execution_id).first()
 
             if not exec_model:
                 raise ValueError(f"execution not found: {execution_id}")
@@ -331,22 +309,16 @@ class SQLAlchemyPostgresRepository(ExtendedRepository):
                 query = query.filter(ExecutionModel.status == list_filter.status)
 
             if list_filter.state_machine_id:
-                query = query.filter(
-                    ExecutionModel.state_machine_id == list_filter.state_machine_id
-                )
+                query = query.filter(ExecutionModel.state_machine_id == list_filter.state_machine_id)
 
             if list_filter.name:
                 query = query.filter(ExecutionModel.name.ilike(f"%{list_filter.name}%"))
 
             if list_filter.start_after:
-                query = query.filter(
-                    ExecutionModel.start_time >= list_filter.start_after
-                )
+                query = query.filter(ExecutionModel.start_time >= list_filter.start_after)
 
             if list_filter.start_before:
-                query = query.filter(
-                    ExecutionModel.start_time <= list_filter.start_before
-                )
+                query = query.filter(ExecutionModel.start_time <= list_filter.start_before)
         return query
 
     # Conversion helpers

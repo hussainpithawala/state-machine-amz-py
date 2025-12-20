@@ -622,18 +622,6 @@ class TestSucceedState:
         assert mock_processor.apply_output_path.call_count == num_tasks
 # Test helper functions
 
-def test_string_ptr_helper():
-    """Test StringPtr helper function (equivalent to Go's StringPtr)."""
-    # In Python, we just use strings directly or None
-    # This test shows the equivalent patterns
-
-    # Go: StringPtr("$.data") returns *string
-    # Python: "$.data" (or None) directly
-
-    assert "$.data" is not None  # Equivalent to non-nil pointer in Go
-    assert None is None  # Equivalent to nil pointer in Go
-
-
 # Benchmark tests (optional - run with pytest -m benchmark)
 
 @pytest.mark.benchmark

@@ -11,12 +11,7 @@ from typing import Any, Callable, Dict, Optional
 import pytest
 
 from src.states.base import CatchRule, RetryRule, StateError
-from src.states.task_state import (
-    AbstractTaskHandler,
-    DefaultTaskHandler,
-    TaskState,
-    with_execution_context,
-)
+from src.states.task_state import AbstractTaskHandler, DefaultTaskHandler, TaskState, with_execution_context
 
 
 # Mock ExecutionContext implementation

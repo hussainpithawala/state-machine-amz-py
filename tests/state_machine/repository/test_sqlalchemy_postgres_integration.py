@@ -10,12 +10,7 @@ from psycopg2.errorcodes import SQL_ROUTINE_EXCEPTION
 from sqlalchemy import text
 
 from src.repository.sqlalchemy_postgres import SQLAlchemyPostgresRepository
-from src.repository.types import (
-    ExecutionFilter,
-    ExecutionRecord,
-    RepositoryConfig,
-    StateHistoryRecord,
-)
+from src.repository.types import ExecutionFilter, ExecutionRecord, RepositoryConfig, StateHistoryRecord
 
 
 class TestSQLAlchemyPostgresIntegration():
@@ -28,7 +23,7 @@ class TestSQLAlchemyPostgresIntegration():
         # Get connection string from environment or use default
         conn_url = os.getenv(
             "POSTGRES_TEST_URL",
-            "postgresql://postgres:postgres@localhost:5432/statemachine_test_py_sql",
+            "postgresql://postgres:postgres@localhost:5432/statemachine_test",
         )
 
         config = RepositoryConfig(
