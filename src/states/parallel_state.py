@@ -189,7 +189,7 @@ class ParallelState(BaseState):
         return result
 
     @classmethod
-    def from_dict(cls, name: str, state_dict: Dict[str, Any], state_factory=None) -> ParallelState:
+    def from_dict(cls, state_dict: Dict[str, Any], state_factory=None) -> ParallelState:
         """
         Create ParallelState from dictionary.
 
@@ -217,7 +217,6 @@ class ParallelState(BaseState):
             branches.append(branch)
 
         return cls(
-            name=name,
             next_state=next_state,
             end=end,
             input_path=input_path,

@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 from .base import BaseState, StateError, get_path_processor
 
@@ -281,7 +281,7 @@ class ChoiceState(BaseState):
     def _evaluate_comparison(self, rule: ChoiceRule, variable_value: Any) -> bool:
         """Evaluate comparison operators."""
         # Define comparison configurations: (attribute_name, handler_method, comparison_lambda)
-        comparisons = [
+        comparisons: List[Tuple[str, Callable, Optional[Callable]]] = [
             ("string_equals", self._compare_string, lambda a, b: a == b),
             ("string_less_than", self._compare_string, lambda a, b: a < b),
             ("string_greater_than", self._compare_string, lambda a, b: a > b),
@@ -307,7 +307,7 @@ class ChoiceState(BaseState):
 
         raise StateError("no comparison operator specified in choice rule")
 
-    def _compare_string(self, variable_value: Any, expected: str, compare_func) -> bool:
+    def _compare_string(self, variable_value: Any, expected: str, compare_func: Callable) -> bool:
         """Compare string values."""
         if isinstance(variable_value, str):
             str_value = variable_value
@@ -315,7 +315,7 @@ class ChoiceState(BaseState):
             str_value = str(variable_value)
         return compare_func(str_value, expected)
 
-    def _compare_numeric(self, variable_value: Any, expected: float, compare_func) -> bool:
+    def _compare_numeric(self, variable_value: Any, expected: float, compare_func: Callable) -> bool:
         """Compare numeric values."""
         try:
             if isinstance(variable_value, (int, float)):
@@ -340,7 +340,7 @@ class ChoiceState(BaseState):
                 return expected is False
         return False
 
-    def _compare_timestamp(self, variable_value: Any, expected_str: str, compare_func) -> bool:
+    def _compare_timestamp(self, variable_value: Any, expected_str: str, compare_func: Callable) -> bool:
         """Compare timestamp values."""
         try:
             # Parse expected timestamp

@@ -294,7 +294,7 @@ class WaitState(BaseState):
         else:
             raise ValueError(f"Cannot convert {type(value).__name__} to number")
 
-    def validate(self, skip_type=False, skip_next_state=False) -> None:
+    def validate(self, skip_name=False, skip_type=False, skip_next_state=False) -> None:
         """
         Validate the Wait state configuration.
 

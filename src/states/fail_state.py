@@ -78,7 +78,7 @@ class FailState(BaseState):
             error_type=self.error,
         )
 
-    def validate(self, skip_type=False, skip_next_state=False) -> None:
+    def validate(self, skip_name=False, skip_type=False, skip_next_state=False) -> None:
         """
         Validate the Fail state configuration.
 

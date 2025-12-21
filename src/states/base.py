@@ -159,6 +159,7 @@ class BaseState(ABC):
 
         Raises:
             ValueError: If the state configuration is invalid
+            :param skip_name:
             :param skip_type:
             :param skip_next_state:
         """

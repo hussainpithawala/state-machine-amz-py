@@ -9,7 +9,7 @@ from __future__ import annotations
 import asyncio
 from abc import ABC
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Protocol, runtime_checkable
+from typing import Any, Callable, Dict, List, Optional, Protocol, runtime_checkable
 
 from .base import BaseState, CatchRule, RetryRule, StateError
 
@@ -53,7 +53,7 @@ class ExecutionContext(Protocol):
     # def get_task_handler(self, resource: str) -> Optional[Callable[[Any], Any]]:
     #     """Get a task handler for the given resource."""
     #     ...
-    def get_task_handler(self, resource: str) -> TaskHandler:
+    def get_task_handler(self, resource: str) -> TaskHandler | Optional[Callable]:
         """Get a task handler for the given resource."""
         ...
 
@@ -97,21 +97,25 @@ class DefaultTaskHandler:
         exec_ctx = context.get(EXECUTION_CONTEXT_KEY)
         if exec_ctx is not None and isinstance(exec_ctx, ExecutionContext):
             # Get handler from execution context
-            handler = exec_ctx.get_task_handler(resource)
+            handler: TaskHandler | Optional[Callable] = exec_ctx.get_task_handler(resource)
             if handler is not None:
                 # Apply parameters if provided
-                task_input = input_data
                 if parameters is not None:
                     from .json_path import JSONPathProcessor
 
                     processor = JSONPathProcessor()
-                    task_input = processor.expand_value(parameters, {"$": input_data})
-
-                # Execute the registered handler
-                if asyncio.iscoroutinefunction(handler):
-                    return await handler(task_input)
+                    processor.expand_value(parameters, {"$": input_data})
+                if callable(handler):
+                    if asyncio.iscoroutinefunction(handler):
+                        return await handler(resource, input_data, parameters)
+                    else:
+                        return handler(resource, input_data, parameters)
                 else:
-                    return handler(task_input)
+                    # Execute the registered handler
+                    if asyncio.iscoroutinefunction(handler.execute):
+                        return await handler.execute(resource, input_data, parameters)
+                    else:
+                        return handler.execute(resource, input_data, parameters)
 
         # Fallback: return input as-is
         return input_data
@@ -152,7 +156,7 @@ class TaskState(BaseState):
     Task states execute work by calling a task handler with the input data.
     """
 
-    name: str = field(default=None, repr=False)
+    name: str = field(default="", repr=False)
     resource: str = field(default="", repr=False)
     parameters: Optional[Dict[str, Any]] = field(default=None, repr=False)
     timeout_seconds: Optional[int] = field(default=None, repr=False)
@@ -167,7 +171,7 @@ class TaskState(BaseState):
         self.type = "Task"
         self.validate(skip_type=True, skip_next_state=False)
 
-    def validate(self, skip_type: bool = False, skip_next_state: bool = False) -> None:
+    def validate(self, skip_name=False, skip_type=False, skip_next_state=False) -> None:
         """Validate task state configuration."""
         super().validate(skip_type, skip_next_state)
 
@@ -212,7 +216,9 @@ class TaskState(BaseState):
             if not catch_policy.next_state:
                 raise ValueError(f"Task state '{self.name}' Catch policy {i}: Next is required")
 
-    async def execute(self, input_data: Any, context: Optional[Dict[str, Any]] = None) -> tuple[Any, Optional[str]]:
+    async def execute(
+        self, input_data: Optional[Dict[str, Any]], context: Optional[Dict[str, Any]] = None
+    ) -> tuple[Any, Optional[str]]:
         """Execute the task state."""
         if context is None:
             context = {}
@@ -221,10 +227,11 @@ class TaskState(BaseState):
             # Prepare input and parameters
             processor, task_input, processed_input = self._prepare_input(input_data)
 
-            # Get task handler
-            _exec_context = context.get(EXECUTION_CONTEXT_KEY)
-            if _exec_context:
-                handler = context.get(EXECUTION_CONTEXT_KEY).handlers.get(self.resource)
+            # Get ExecutionContext from context or fallback to default handler
+            _exec_context: Any = context.get(EXECUTION_CONTEXT_KEY)
+            # Need to double check to avoid type-casting issues reported by mypy
+            if _exec_context and _exec_context.__class__.__name__ == "ExecutionContext":
+                handler = _exec_context.get_task_handler(self.resource)
                 if handler is None:
                     handler = self._get_task_handler()
             else:

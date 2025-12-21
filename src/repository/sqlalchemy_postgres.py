@@ -302,7 +302,7 @@ class SQLAlchemyPostgresRepository(ExtendedRepository):
                 )
             )
 
-    def _apply_filters(self, query, list_filter: ExecutionFilter):
+    def _apply_filters(self, query, list_filter: Optional[ExecutionFilter]):
         if list_filter:
             """Applies filters to a query."""
             if list_filter.status:
@@ -353,7 +353,7 @@ class SQLAlchemyPostgresRepository(ExtendedRepository):
             end_time=model.end_time,
             current_state=model.current_state,
             error=model.error,
-            metadata=model.metadata,
+            metadata=model.metadata.__dict__,
         )
 
     @staticmethod
@@ -393,5 +393,5 @@ class SQLAlchemyPostgresRepository(ExtendedRepository):
             error=model.error,
             retry_count=model.retry_count,
             sequence_number=model.sequence_number,
-            metadata=model.metadata,
+            metadata=model.metadata.__dict__,
         )

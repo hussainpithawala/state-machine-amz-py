@@ -171,6 +171,7 @@ class StateMachine:
         input_data: Any,
         context: Optional[Dict[str, Any]] = None,
         execution_name: Optional[str] = None,
+        execution_id: Optional[str] = None,
     ) -> Execution:
         """
         Execute the state machine with given input.
@@ -182,6 +183,10 @@ class StateMachine:
 
         Returns:
             Execution object with results
+            :param input_data:
+            :param context:
+            :param execution_name:
+            :param execution_id:
         """
         if context is None:
             context = {}

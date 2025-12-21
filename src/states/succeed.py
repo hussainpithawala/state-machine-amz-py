@@ -90,12 +90,13 @@ class SucceedState(BaseState):
                 error_type="States.Runtime",
             ) from e
 
-    def validate(self, skip_type=False, skip_next_state=False) -> None:
+    def validate(self, skip_name=False, skip_type=False, skip_next_state=False) -> None:
         """
         Validate the Succeed state configuration.
 
         Raises:
             ValueError: If the state configuration is invalid
+            :param skip_name:
             :param skip_type:
             :param skip_next_state:
         """

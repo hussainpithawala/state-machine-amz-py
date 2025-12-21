@@ -3,8 +3,10 @@ Factory for creating state objects from definitions.
 
 Creates appropriate state objects based on type.
 """
-
+import typing
 from typing import Any, Dict
+
+from src.states import BaseState
 
 
 class StateFactory:
@@ -237,7 +239,7 @@ class StateFactory:
             comment=data.get("Comment"),
         )
 
-    def register_creator(self, state_type: str, creator: callable) -> None:
+    def register_creator(self, state_type: str, creator: typing.Callable[[str, dict], BaseState]) -> None:
         """
         Register a custom state creator.
 

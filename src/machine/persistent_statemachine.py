@@ -98,17 +98,28 @@ class StateHistoryEntry:
         self.end_time = datetime.utcnow()
 
 
-# Pre-declaration to solve the NameError
 @dataclass
-class PersistentStateMachine(StateMachine):
+class PersistentStateMachine:
     """State machine with persistence capabilities."""
+
+    state_machine: StateMachine
+    persistence_manager: PersistenceManager
+    state_machine_id: str
+
+    def __post_init__(self):
+        if self.state_machine is None:
+            raise ValueError("state_machine cannot be None")
+        if self.persistence_manager is None:
+            raise ValueError("persistence_manager cannot be None")
+        if self.state_machine_id is None:
+            self.state_machine_id = f"sm-{int(time.time())}"
 
     @classmethod
     def create_from_json(
         cls,
         json_str: str,
         persistence_manager: PersistenceManager,
-        state_machine_id: Optional[str] = None,
+        state_machine_id: str,
     ) -> PersistentStateMachine:
         """Factory function to create a persistent state machine.
 
@@ -120,9 +131,11 @@ class PersistentStateMachine(StateMachine):
         Returns:
             PersistentStateMachine instance
         """
-        psm = PersistentStateMachine.from_json(definition=json_str)
-        psm._set_state_machine_id(state_machine_id=state_machine_id)
-        psm._set_persistence_manager(persistence_manager=persistence_manager)
+        psm: PersistentStateMachine = PersistentStateMachine(
+            state_machine=StateMachine.from_json(definition=json_str),
+            persistence_manager=persistence_manager,
+            state_machine_id=state_machine_id,
+        )
         return psm
 
     @classmethod
@@ -147,9 +160,11 @@ class PersistentStateMachine(StateMachine):
         if persistence_manager is None:
             raise ValueError("Cannot prepare a persistent-state-machine without a persistent manager")
 
-        psm = PersistentStateMachine.from_json(definition=yaml_str)
-        psm._set_state_machine_id(state_machine_id=state_machine_id)
-        psm._set_persistence_manager(persistence_manager=persistence_manager)
+        psm: PersistentStateMachine = PersistentStateMachine(
+            state_machine=StateMachine.from_yaml(definition=yaml_str),
+            persistence_manager=persistence_manager,
+            state_machine_id=state_machine_id,
+        )
         return psm
 
     async def execute(
@@ -181,9 +196,9 @@ class PersistentStateMachine(StateMachine):
         exec_name = execution_name or f"execution-{int(time.time())}"
         execution_id = execution_id or f"{exec_name}-id-{random.randint(1, 10)}"
 
-        persistent_exec_context = PersistentContext(
+        persistent_exec_context: PersistentContext = PersistentContext(
             name=exec_name,
-            start_state=self.start_at,
+            start_state=self.state_machine.start_at,
             input_data=input_data,
             execution_id=execution_id,
             state_machine_id=self.state_machine_id,
@@ -199,16 +214,12 @@ class PersistentStateMachine(StateMachine):
         # Run execution
         return await self._run_execution(persistent_exec_context, task_exec_context)
 
-    def _set_persistence_manager(self, persistence_manager: PersistenceManager):
-        self.persistence_manager = persistence_manager
-
     def get_persistence_manager(self) -> PersistenceManager:
         return self.persistence_manager
 
-    def _set_state_machine_id(self, state_machine_id: str):
-        self.state_machine_id = state_machine_id or f"sm-{int(time.time())}"
-
-    async def _run_execution(self, exec_ctx: PersistentContext, task_exec_ctx: Dict[str, Any]) -> PersistentContext:
+    async def _run_execution(
+        self, exec_ctx: PersistentContext, task_exec_ctx: Optional[Dict[str, Any]]
+    ) -> PersistentContext:
         """Run the execution with persistence hooks.
 
         Args:
@@ -224,7 +235,7 @@ class PersistentStateMachine(StateMachine):
 
         while True:
             # Get current state
-            state = self.states.get(current_state_name)
+            state = self.state_machine.states.get(current_state_name)
             if not state:
                 error = Exception(f"state not found: {current_state_name}")
                 exec_ctx.mark_failed(error)
@@ -286,10 +297,10 @@ class PersistentStateMachine(StateMachine):
                 await self._persist_execution(exec_ctx)
                 return exec_ctx
             except KeyboardInterrupt:
-                error = Exception("execution cancelled by user")
-                exec_ctx.mark_cancelled(error)
+                key_exception = Exception("execution cancelled by user")
+                exec_ctx.mark_cancelled(key_exception)
                 await self._persist_execution(exec_ctx)
-                raise
+                raise key_exception
 
     async def _persist_execution(self, exec_ctx: PersistentContext) -> None:
         """Persist execution state to repository.

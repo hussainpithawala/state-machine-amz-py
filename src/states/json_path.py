@@ -63,7 +63,7 @@ class JSONPathProcessor(PathProcessor):
             List of path parts
         """
         parts = []
-        current = []
+        current: List[str] = []
         in_brackets = False
 
         for ch in path:
@@ -337,18 +337,18 @@ class JSONPathProcessor(PathProcessor):
             return value
 
         elif isinstance(value, dict):
-            result = {}
+            dict_result = {}
             for key, val in value.items():
                 expanded = self.expand_value(val, input_data)
-                result[key] = expanded
-            return result
+                dict_result[key] = expanded
+            return dict_result
 
         elif isinstance(value, list):
-            result = []
+            list_result = []
             for val in value:
                 expanded = self.expand_value(val, input_data)
-                result.append(expanded)
-            return result
+                list_result.append(expanded)
+            return list_result
         else:
             return value
 

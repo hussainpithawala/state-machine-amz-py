@@ -1,6 +1,6 @@
 # pkg/repository/test_repository.py
 """Unit tests for repository manager."""
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Optional
 from unittest.mock import patch
 

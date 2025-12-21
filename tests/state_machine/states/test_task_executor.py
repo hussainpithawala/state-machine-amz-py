@@ -11,6 +11,7 @@ from typing import Any, Callable, Dict, Optional
 import pytest
 
 from src.states.base import CatchRule, RetryRule, StateError
+from src.states.json_path import JSONPathProcessor
 from src.states.task_state import AbstractTaskHandler, DefaultTaskHandler, TaskState, with_execution_context
 
 
@@ -25,7 +26,7 @@ class MockExecutionContext:
         """Register a task handler for a resource."""
         self.handlers[resource] = handler
 
-    def get_task_handler(self, resource: str) -> Optional[Callable[[Any], Any]]:
+    def get_task_handler(self, resource: str) -> Optional[Callable]:
         """Get a task handler for a resource."""
         return self.handlers.get(resource)
 
@@ -37,7 +38,7 @@ async def test_task_executor_basic():
     mock_exec_ctx = MockExecutionContext()
 
     # Register a simple handler
-    async def hello_world_handler(input_data):
+    async def hello_world_handler(resource, input_data, parameters):
         print(f"Executing HelloWorld with input: {input_data}")
         if isinstance(input_data, dict):
             input_data["message"] = "Hello, World!"
@@ -80,17 +81,25 @@ async def test_task_executor_with_parameters():
     mock_exec_ctx = MockExecutionContext()
 
     # Register payment processor
-    async def payment_processor(input_data):
+    async def payment_processor(resource, input_data, parameters):
         print(f"Processing payment with input: {input_data}")
 
         if not isinstance(input_data, dict):
             raise ValueError("invalid payment input")
 
         # Validate required fields
-        if "amount" not in input_data or input_data.get("amount", 0) <= 0:
+        json_path_processor = JSONPathProcessor()
+        amount = json_path_processor.get_value(input_data, parameters['amount'])
+        if amount is None:
             raise ValueError("invalid amount")
 
+        currency = json_path_processor.get_value(input_data, parameters['currency'])
+        if currency is None:
+            raise ValueError("invalid currency")
+
         # Process payment
+        input_data["amount"] = amount
+        input_data["currency"] = currency
         input_data["status"] = "COMPLETED"
         input_data["transaction_id"] = f"TXN-{int(time.time() * 1000000)}"
         input_data["processed_at"] = time.strftime("%Y-%m-%dT%H:%M:%S")
@@ -135,7 +144,7 @@ async def test_task_executor_with_timeout():
     mock_exec_ctx = MockExecutionContext()
 
     # Register slow operation
-    async def slow_operation(input_data):
+    async def slow_operation(resource, input_data, parameters):
         print("Starting slow operation")
         await asyncio.sleep(2)
         print("Slow operation completed")
@@ -191,7 +200,7 @@ async def test_task_executor_error_handling():
     mock_exec_ctx = MockExecutionContext()
 
     # Register error generator
-    async def error_generator(input_data):
+    async def error_generator(resource, input_data, parameters):
         if isinstance(input_data, dict) and input_data.get("should_fail") is True:
             raise StateError("Task execution failed", error_type="States.TaskFailed")
         return {"status": "success"}
@@ -247,7 +256,7 @@ async def test_task_state_integration():
         async def execute(
             self,
             resource: str,
-            input_data: Any,
+            input_data: Optional[Dict[str, Any]],
             parameters: Optional[Dict[str, Any]] = None,
             context: Optional[Dict[str, Any]] = None,
         ) -> Any:
@@ -256,14 +265,14 @@ async def test_task_state_integration():
         async def execute_with_timeout(
             self,
             resource: str,
-            input_data: Any,
+            input_data: Optional[Dict[str, Any]],
             parameters: Optional[Dict[str, Any]] = None,
             timeout_seconds: Optional[int] = None,
             context: Optional[Dict[str, Any]] = None,
         ) -> Any:
             return self.transform_data(input_data)
 
-        def transform_data(self, input_data):
+        def transform_data(self, input_data: Optional[Dict[str, Any]]) -> Any:
             if not isinstance(input_data, dict):
                 raise ValueError("invalid input")
 
@@ -275,10 +284,12 @@ async def test_task_state_integration():
 
     mock_exec_ctx.register_handler("arn:aws:lambda:function:TransformData", TransformDataHandler())
 
+    resource_key = "arn:aws:lambda:function:TransformData"
+
     # Create task state
     task_state = TaskState(
         name="ProcessData",
-        resource="arn:aws:lambda:function:TransformData",
+        resource=resource_key,
         next_state="NextState",
         result_path="$.result",
         output_path="$.result",
@@ -458,7 +469,7 @@ async def test_example_task_executor():
     mock_exec_ctx = MockExecutionContext()
 
     # Register payment processor
-    async def process_payment(input_data):
+    async def process_payment(resource, input_data, parameters):
         payment = input_data
         payment["status"] = "processed"
         payment["transaction_id"] = f"TXN-{int(time.time() * 1000000)}"
@@ -467,7 +478,7 @@ async def test_example_task_executor():
     mock_exec_ctx.register_handler("arn:aws:states:::payment:process", process_payment)
 
     # Register email sender
-    async def send_email(input_data):
+    async def send_email(resource, input_data, parameters):
         email = input_data
         print(f"Sending email to: {email.get('to')}")
         email["sent"] = True
@@ -516,7 +527,7 @@ async def test_synchronous_handler():
     mock_exec_ctx = MockExecutionContext()
 
     # Register synchronous handler
-    def sync_handler(input_data):
+    def sync_handler(resource, input_data, parameters):
         return {"result": "sync", "input": input_data}
 
     mock_exec_ctx.register_handler("arn:aws:lambda:::sync:function", sync_handler)
