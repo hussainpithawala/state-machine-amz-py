@@ -1,66 +1,217 @@
 [tool.poetry]
 name = "state-machine-amz-py"
 version = "0.1.0"
-description = "A powerful, extensible state machine implementation for Python applications"
-authors = ["Your Name <your.email@example.com>"]
+description = "A powerful, extensible Amazon States Language based FSM implementation for Python with PostgreSQL persistence"
+authors = ["Hussain Pithawala <hussainpithawala@gmail.com>"]
 license = "MIT"
 readme = "README.md"
 homepage = "https://github.com/hussainpithawala/state-machine-amz-py"
 repository = "https://github.com/hussainpithawala/state-machine-amz-py"
 documentation = "https://github.com/hussainpithawala/state-machine-amz-py#readme"
-keywords = ["state-machine", "finite-state-machine", "fsm", "workflow", "automation"]
+keywords = [
+    "state-machine",
+    "finite-state-machine",
+    "fsm",
+    "workflow",
+    "automation",
+    "amazon-states-language",
+    "step-functions",
+    "orchestration",
+    "persistence",
+    "postgresql"
+]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: System :: Distributed Computing",
+    "Typing :: Typed",
+    "Operating System :: OS Independent",
 ]
 
 # Explicitly define packages
 packages = [
-    { include = "state_machine", from = "src" },
+    { include = "src", from = "." },
 ]
 
+[tool.poetry.urls]
+"Bug Tracker" = "https://github.com/hussainpithawala/state-machine-amz-py/issues"
+"Changelog" = "https://github.com/hussainpithawala/state-machine-amz-py/blob/main/CHANGELOG.md"
+
 [tool.poetry.dependencies]
-python = "^3.12"
+python = ">=3.9,<4.0"
 pydantic = "^2.0"
+jsonpath-ng = "^1.7.0"
+ramda = "^0.7.6"
+sqlalchemy = "^2.0.0"
+psycopg2-binary = "^2.9.0"
+pyyaml = "^6.0"
+types-pyyaml = "^6.0.12.20250915"
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^7.0"
+pytest = "^8.0"
 pytest-cov = "^4.0"
+pytest-asyncio = "^0.23.0"
+pytest-benchmark = "^5.0"
+pytest-mock = "^3.12"
 black = "^23.0"
 isort = "^5.12"
-flake8 = "^7.3.0"
+flake8 = "^7.3"
 mypy = "^1.0"
 pre-commit = "^3.0"
+bandit = "^1.7.5"
+safety = "^2.3.0"
+radon = "^6.0.0"
+
+[tool.poetry.group.async]
+optional = true
+
+[tool.poetry.group.async.dependencies]
+asyncpg = "^0.29.0"
+
+[tool.poetry.group.docs]
+optional = true
 
 [tool.poetry.group.docs.dependencies]
 sphinx = "^7.0"
-sphinx-rtd-theme = "^1.0"
+sphinx-rtd-theme = "^1.3"
+sphinx-autodoc-typehints = "^1.24.0"
+
+[tool.poetry.scripts]
+statemachine = "src.cli:main"
 
 [build-system]
-requires = ["poetry-core"]
+requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
+# Tool configurations
+
 [tool.black]
-line-length = 88
-target-version = ['py38']
+python_version = "3.12"
+line-length = 120
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
 
 [tool.isort]
 profile = "black"
-line_length = 88
+line_length = 120
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+ensure_newline_before_comments = true
+skip_gitignore = true
+src_paths = ["src", "tests"]
 
 [tool.mypy]
 python_version = "3.12"
 warn_return_any = true
 warn_unused_configs = true
-disallow_untyped_defs = true
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+check_untyped_defs = true
+disallow_untyped_decorators = false
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+follow_imports = "normal"
+ignore_missing_imports = true
+strict_equality = true
+pretty = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+ignore_errors = true
 
 [tool.pytest.ini_options]
+minversion = "7.0"
 pythonpath = ["src"]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
-addopts = "--cov=state_machine --cov-report=term-missing"
+addopts = [
+    "-v",
+    "--strict-markers",
+    "--tb=short",
+    "--cov=src",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+]
+markers = [
+    "unit: Unit tests",
+    "integration: Integration tests requiring database",
+    "slow: Slow running tests",
+    "asyncio: Async tests",
+]
+asyncio_mode = "auto"
+
+[tool.coverage.run]
+source = ["src"]
+omit = [
+    "*/tests/*",
+    "*/test_*.py",
+    "*/__pycache__/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "@abstractmethod",
+    "\\.\\.\\.",
+]
+precision = 2
+show_missing = true
+
+[tool.coverage.html]
+directory = "htmlcov"
+
+[tool.flake8]
+python_version = "3.12"
+max-line-length = 100
+extend-ignore = ["E203", "W503", "E501"]
+exclude = [
+    ".git",
+    "__pycache__",
+    "build",
+    "dist",
+    ".eggs",
+    "*.egg-info",
+    ".venv",
+    ".tox",
+]
+per-file-ignores = [
+    "__init__.py:F401",
+]
+
+[tool.bandit]
+python_version = "3.12"
+exclude_dirs = ["tests", "build", "dist"]
+tests = ["B201", "B301"]
+skips = ["B101", "B601"]
+
+[tool.radon]
+python_version = "3.12"
+cc_min = "C"
+mi_min = "B"

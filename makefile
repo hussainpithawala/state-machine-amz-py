@@ -1,4 +1,4 @@
-.PHONY: help install install-dev install-docs clean lint format check test test-cov test-watch test-report type-check docs build publish publish-test check-build pre-commit pre-commit-all version-patch version-minor version-major run-example run-example-simple run-example-advanced export-requirements lock check-lock update-deps ci validate all
+.PHONY: help install install-dev install-docs clean lint format check test test-cov test-watch test-report type-check docs build publish publish-test check-build pre-commit pre-commit-all version-patch version-minor version-major run-example runim-example-simple run-example-advanced export-requirements lock check-lock update-deps ci validate all
 
 # Variables
 PYTHON := python
