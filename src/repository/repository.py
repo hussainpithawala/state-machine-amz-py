@@ -1,7 +1,7 @@
 # pkg/repository/repository.py
 """Repository manager for persistence operations."""
 
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import List
 
 from .sqlalchemy_postgres import SQLAlchemyPostgresRepository

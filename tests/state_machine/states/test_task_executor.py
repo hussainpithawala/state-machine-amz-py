@@ -89,11 +89,11 @@ async def test_task_executor_with_parameters():
 
         # Validate required fields
         json_path_processor = JSONPathProcessor()
-        amount = json_path_processor.get_value(input_data, parameters['amount'])
+        amount = json_path_processor.get_value(input_data, parameters["amount"])
         if amount is None:
             raise ValueError("invalid amount")
 
-        currency = json_path_processor.get_value(input_data, parameters['currency'])
+        currency = json_path_processor.get_value(input_data, parameters["currency"])
         if currency is None:
             raise ValueError("invalid currency")
 

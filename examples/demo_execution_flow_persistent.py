@@ -699,7 +699,7 @@ def cleanup_data(persistence_manager):
         # Truncate in FK-safe order
         session.execute(text("TRUNCATE TABLE state_history CASCADE"))
         session.execute(text("TRUNCATE TABLE executions CASCADE"))
-        # session.execute(text("TRUNCATE TABLE execution_statistics CASCADE"))
+        session.execute(text("TRUNCATE TABLE execution_statistics CASCADE"))
 
 
 if __name__ == "__main__":

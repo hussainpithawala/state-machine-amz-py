@@ -22,7 +22,7 @@ class TestSQLAlchemyPostgresIntegration:
         # Get connection string from environment or use default
         conn_url = os.getenv(
             "POSTGRES_TEST_URL",
-            "postgresql://postgres:postgres@localhost:5432/statemachine_test_py_sql",
+            "postgresql://postgres:postgres@localhost:5432/statemachine_test",
         )
 
         config = RepositoryConfig(
@@ -62,7 +62,6 @@ class TestSQLAlchemyPostgresIntegration:
                 session.execute(text("TRUNCATE TABLE state_history CASCADE"))
                 session.execute(text("TRUNCATE TABLE executions CASCADE"))
                 session.execute(text("TRUNCATE TABLE execution_statistics CASCADE"))
-
 
     def test_save_and_get_execution(self):
         """Test basic save and retrieve operations."""

@@ -62,7 +62,7 @@ jobs:
 
       - name: Type check with mypy
         run: poetry run mypy src/ --ignore-missing-imports
-        continue-on-error: true
+        continue-on-error: false
 
   test:
     name: Test Python ${{ matrix.python-version }}
@@ -175,7 +175,7 @@ jobs:
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/statemachine_demo
         run: |
-          python examples/demo_execution_flow_persistent.py
+          poetry run python examples/demo_execution_flow_persistent.py
         continue-on-error: true
 
   build:
